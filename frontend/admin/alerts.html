@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alerts - Smart Parking System</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Smart Parking System - Admin Dashboard</h1>
+            <nav>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="slots.html">Slots</a>
+                <a href="vehicles.html">Vehicles</a>
+                <a href="alerts.html" class="active">Alerts</a>
+                <a href="feedback.html">Feedback</a>
+                <a href="#" onclick="logout()">Logout</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="card">
+                <div class="card-header">
+                    <h2>Stolen Vehicle Alerts</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="loadAlerts()" class="btn btn-secondary" title="Refresh alerts">
+                            🔄 Refresh
+                        </button>
+                        <button onclick="showAddAlertModal()" class="btn btn-primary">Add Stolen Vehicle</button>
+                    </div>
+                </div>
+
+                <div id="loadingMessage" class="message" style="display: none;">
+                    <div class="success">Loading stolen vehicle alerts...</div>
+                </div>
+
+                <div class="table-container">
+                    <table id="alertsTable">
+                        <thead>
+                            <tr>
+                                <th>Vehicle Number</th>
+                                <th>Vehicle Type</th>
+                                <th>Owner Name</th>
+                                <th>Police Case #</th>
+                                <th>Police Station</th>
+                                <th>Reported Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 20px;">
+                                    Loading alerts...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Active Parking Alerts</h2>
+                <div id="activeAlerts" class="alerts-list">
+                    <!-- Active alerts will be loaded here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Alert Modal -->
+    <div id="addAlertModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddAlertModal()">&times;</span>
+            <h2>Add Stolen Vehicle</h2>
+            <form id="addAlertForm">
+                <div class="form-group">
+                    <label for="alertVehicleNumber">Vehicle Number *</label>
+                    <input type="text" id="alertVehicleNumber" name="vehicleNumber" required 
+                           placeholder="e.g., ABC-1234">
+                </div>
+
+                <div class="form-group">
+                    <label for="alertVehicleType">Vehicle Type *</label>
+                    <select id="alertVehicleType" name="vehicleType" required>
+                        <option value="">Select Type</option>
+                        <option value="car">Car</option>
+                        <option value="motorcycle">Motorcycle</option>
+                        <option value="truck">Truck</option>
+                        <option value="van">Van</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="alertOwnerName">Owner Name *</label>
+                    <input type="text" id="alertOwnerName" name="ownerName" required 
+                           placeholder="Enter owner name">
+                </div>
+
+                <div class="form-group">
+                    <label for="alertDescription">Description</label>
+                    <textarea id="alertDescription" name="description" rows="3" 
+                              placeholder="Additional details about the stolen vehicle"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Add Alert</button>
+                <button type="button" class="btn btn-secondary" onclick="closeAddAlertModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="../assets/js/main.js"></script>
+    <script>
+        // Check authentication
+        if (!localStorage.getItem('adminToken')) {
+            window.location.href = 'login.html';
+        }
+
+        // Fetch and display stolen vehicle alerts
+        async function loadAlerts() {
+            const loadingMessage = document.getElementById('loadingMessage');
+            const alertsTable = document.querySelector('#alertsTable tbody');
+            
+            try {
+                // Show loading message
+                loadingMessage.style.display = 'block';
+                alertsTable.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">Loading...</td></tr>';
+                
+                // Fetch alerts from backend API
+                const response = await fetch('../../backend/api/admin.php?action=getAlerts', {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch alerts');
+                }
+
+                const result = await response.json();
+                
+                // Hide loading message
+                loadingMessage.style.display = 'none';
+                
+                if (result.success) {
+                    alertsTable.innerHTML = '';
+                    
+                    if (result.alerts && result.alerts.length > 0) {
+                        // Display each stolen vehicle alert
+                        result.alerts.forEach(alert => {
+                            const row = document.createElement('tr');
+                            
+                            // Highlight active alerts
+                            if (alert.status === 'active') {
+                                row.style.backgroundColor = '#fee2e2';
+                                row.style.borderLeft = '4px solid #ef4444';
+                            }
+                            
+                            row.innerHTML = `
+                                <td><strong>${alert.vehicle_number || 'N/A'}</strong></td>
+                                <td>${alert.vehicle_type || 'N/A'}</td>
+                                <td>${alert.owner_name || 'N/A'}</td>
+                                <td>${alert.police_case_number || 'N/A'}</td>
+                                <td>${alert.police_station || 'N/A'}</td>
+                                <td>${formatDate(alert.reported_date)}</td>
+                                <td><span class="status-badge ${alert.status}">${alert.status}</span></td>
+                                <td>
+                                    <button onclick="removeAlert(${alert.id})" class="btn btn-small btn-danger">Remove</button>
+                                </td>
+                            `;
+                            alertsTable.appendChild(row);
+                        });
+                    } else {
+                        alertsTable.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px; color: #64748b;">No stolen vehicle alerts found</td></tr>';
+                    }
+
+                    // Load active parking alerts
+                    loadActiveParkingAlerts(result.active_parking_alerts || []);
+                } else {
+                    alertsTable.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px; color: #ef4444;">Error loading alerts: ' + (result.message || 'Unknown error') + '</td></tr>';
+                }
+            } catch (error) {
+                loadingMessage.style.display = 'none';
+                alertsTable.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px; color: #ef4444;">Error: ' + error.message + '</td></tr>';
+                console.error('Error loading alerts:', error);
+            }
+        }
+
+        // Format date helper function
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Display active parking alerts (stolen vehicles currently in parking)
+        function loadActiveParkingAlerts(alerts) {
+            const alertsList = document.getElementById('activeAlerts');
+            alertsList.innerHTML = '';
+            
+            if (alerts.length === 0) {
+                alertsList.innerHTML = '<p style="color: #64748b; padding: 15px;">No active parking alerts - No stolen vehicles currently in parking facility</p>';
+                return;
+            }
+
+            alerts.forEach(alert => {
+                const alertCard = document.createElement('div');
+                alertCard.className = 'alert-card alert-warning';
+                alertCard.style.marginBottom = '15px';
+                alertCard.innerHTML = `
+                    <h4 style="color: #92400e; margin-bottom: 10px;">⚠️ Critical Alert: ${alert.vehicle_number}</h4>
+                    <p style="margin-bottom: 8px;"><strong>${alert.message}</strong></p>
+                    <p style="margin: 0;"><small style="color: #64748b;">Detected at: ${formatDate(alert.timestamp)}</small></p>
+                `;
+                alertsList.appendChild(alertCard);
+            });
+        }
+
+        function showAddAlertModal() {
+            document.getElementById('addAlertModal').style.display = 'block';
+        }
+
+        function closeAddAlertModal() {
+            document.getElementById('addAlertModal').style.display = 'none';
+            document.getElementById('addAlertForm').reset();
+        }
+
+        document.getElementById('addAlertForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('../../backend/api/admin.php?action=addAlert', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    closeAddAlertModal();
+                    loadAlerts();
+                } else {
+                    alert(result.message || 'Failed to add alert');
+                }
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+                console.error('Error:', error);
+            }
+        });
+
+        async function removeAlert(alertId) {
+            if (!confirm('Are you sure you want to remove this alert?')) return;
+
+            try {
+                const response = await fetch('../../backend/api/admin.php?action=removeAlert', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
+                    },
+                    body: JSON.stringify({ alertId: alertId })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    loadAlerts();
+                } else {
+                    alert(result.message || 'Failed to remove alert');
+                }
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+                console.error('Error:', error);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            window.location.href = 'login.html';
+        }
+
+        // Load alerts on page load
+        loadAlerts();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(loadAlerts, 30000);
+    </script>
+</body>
+</html>
+
+

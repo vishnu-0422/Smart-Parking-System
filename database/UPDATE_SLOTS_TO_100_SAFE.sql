@@ -1,0 +1,122 @@
+-- SAFE UPDATE: Convert 50 slots to 100 slots
+-- This handles foreign key constraints properly
+
+USE smart_parking;
+
+-- First, disable foreign key checks temporarily
+SET FOREIGN_KEY_CHECKS=0;
+
+-- Delete existing slots
+DELETE FROM slots;
+
+-- Insert 100 new slots
+INSERT INTO slots (slot_number, slot_type, price_per_hour, status) VALUES
+-- Car Slots Level A (10 slots - ₹5.00/hour)
+('A-101', 'car', 5.00, 'available'),
+('A-102', 'car', 5.00, 'available'),
+('A-103', 'car', 5.00, 'available'),
+('A-104', 'car', 5.00, 'available'),
+('A-105', 'car', 5.00, 'available'),
+('A-106', 'car', 5.00, 'available'),
+('A-107', 'car', 5.00, 'available'),
+('A-108', 'car', 5.00, 'available'),
+('A-109', 'car', 5.00, 'available'),
+('A-110', 'car', 5.00, 'available'),
+-- Car Slots Level B (10 slots - ₹6.00/hour)
+('B-201', 'car', 6.00, 'available'),
+('B-202', 'car', 6.00, 'available'),
+('B-203', 'car', 6.00, 'available'),
+('B-204', 'car', 6.00, 'available'),
+('B-205', 'car', 6.00, 'available'),
+('B-206', 'car', 6.00, 'available'),
+('B-207', 'car', 6.00, 'available'),
+('B-208', 'car', 6.00, 'available'),
+('B-209', 'car', 6.00, 'available'),
+('B-210', 'car', 6.00, 'available'),
+-- Car Slots Level C (20 slots - ₹7.00/hour)
+('C-301', 'car', 7.00, 'available'),
+('C-302', 'car', 7.00, 'available'),
+('C-303', 'car', 7.00, 'available'),
+('C-304', 'car', 7.00, 'available'),
+('C-305', 'car', 7.00, 'available'),
+('C-306', 'car', 7.00, 'available'),
+('C-307', 'car', 7.00, 'available'),
+('C-308', 'car', 7.00, 'available'),
+('C-309', 'car', 7.00, 'available'),
+('C-310', 'car', 7.00, 'available'),
+('C-311', 'car', 7.00, 'available'),
+('C-312', 'car', 7.00, 'available'),
+('C-313', 'car', 7.00, 'available'),
+('C-314', 'car', 7.00, 'available'),
+('C-315', 'car', 7.00, 'available'),
+('C-316', 'car', 7.00, 'available'),
+('C-317', 'car', 7.00, 'available'),
+('C-318', 'car', 7.00, 'available'),
+('C-319', 'car', 7.00, 'available'),
+('C-320', 'car', 7.00, 'available'),
+-- Motorcycle Slots (15 slots - ₹2.00/hour)
+('M-401', 'motorcycle', 2.00, 'available'),
+('M-402', 'motorcycle', 2.00, 'available'),
+('M-403', 'motorcycle', 2.00, 'available'),
+('M-404', 'motorcycle', 2.00, 'available'),
+('M-405', 'motorcycle', 2.00, 'available'),
+('M-406', 'motorcycle', 2.00, 'available'),
+('M-407', 'motorcycle', 2.00, 'available'),
+('M-408', 'motorcycle', 2.00, 'available'),
+('M-409', 'motorcycle', 2.00, 'available'),
+('M-410', 'motorcycle', 2.00, 'available'),
+('M-411', 'motorcycle', 2.00, 'available'),
+('M-412', 'motorcycle', 2.00, 'available'),
+('M-413', 'motorcycle', 2.00, 'available'),
+('M-414', 'motorcycle', 2.00, 'available'),
+('M-415', 'motorcycle', 2.00, 'available'),
+-- Truck Slots (10 slots - ₹10.00/hour)
+('T-501', 'truck', 10.00, 'available'),
+('T-502', 'truck', 10.00, 'available'),
+('T-503', 'truck', 10.00, 'available'),
+('T-504', 'truck', 10.00, 'available'),
+('T-505', 'truck', 10.00, 'available'),
+('T-506', 'truck', 10.00, 'available'),
+('T-507', 'truck', 10.00, 'available'),
+('T-508', 'truck', 10.00, 'available'),
+('T-509', 'truck', 10.00, 'available'),
+('T-510', 'truck', 10.00, 'available'),
+-- Van Slots (15 slots - ₹7.00/hour)
+('V-601', 'van', 7.00, 'available'),
+('V-602', 'van', 7.00, 'available'),
+('V-603', 'van', 7.00, 'available'),
+('V-604', 'van', 7.00, 'available'),
+('V-605', 'van', 7.00, 'available'),
+('V-606', 'van', 7.00, 'available'),
+('V-607', 'van', 7.00, 'available'),
+('V-608', 'van', 7.00, 'available'),
+('V-609', 'van', 7.00, 'available'),
+('V-610', 'van', 7.00, 'available'),
+('V-611', 'van', 7.00, 'available'),
+('V-612', 'van', 7.00, 'available'),
+('V-613', 'van', 7.00, 'available'),
+('V-614', 'van', 7.00, 'available'),
+('V-615', 'van', 7.00, 'available'),
+-- Electric Vehicle Charging Slots (15 slots - ₹8.00/hour)
+('EV-701', 'car', 8.00, 'available'),
+('EV-702', 'car', 8.00, 'available'),
+('EV-703', 'car', 8.00, 'available'),
+('EV-704', 'car', 8.00, 'available'),
+('EV-705', 'car', 8.00, 'available'),
+('EV-706', 'car', 8.00, 'available'),
+('EV-707', 'car', 8.00, 'available'),
+('EV-708', 'car', 8.00, 'available'),
+('EV-709', 'car', 8.00, 'available'),
+('EV-710', 'car', 8.00, 'available'),
+('EV-711', 'car', 8.00, 'available'),
+('EV-712', 'car', 8.00, 'available'),
+('EV-713', 'car', 8.00, 'available'),
+('EV-714', 'car', 8.00, 'available'),
+('EV-715', 'car', 8.00, 'available');
+
+-- Re-enable foreign key checks
+SET FOREIGN_KEY_CHECKS=1;
+
+-- Verify the total count
+SELECT COUNT(*) as total_slots FROM slots;
+SELECT slot_type, COUNT(*) as count FROM slots GROUP BY slot_type;

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking Ticket - Smart Parking System</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Smart Parking System</h1>
+            <nav>
+                <a href="entry.html">Entry</a>
+                <a href="slot.html">Select Slot</a>
+                <a href="exit.html">Exit</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="card">
+                <h2>Parking Ticket</h2>
+                
+                <div class="ticket-container">
+                    <div id="ticketInfo" class="ticket-info">
+                        <!-- Ticket information will be loaded here -->
+                    </div>
+
+                    <div class="qr-container">
+                        <h3>QR Code</h3>
+                        <div id="qrCode">
+                            <!-- QR code will be generated here -->
+                        </div>
+                        <p class="qr-instruction">Scan this QR code at the exit gate</p>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button onclick="window.print()" class="btn btn-secondary">Print Ticket</button>
+                    <button onclick="downloadQR()" class="btn btn-secondary">Download QR</button>
+                    <a href="extend.html" class="btn btn-primary">Extend Parking</a>
+                </div>
+
+                <div id="message" class="message"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../assets/js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const bookingId = urlParams.get('bookingId');
+
+        // Load ticket information and generate QR code
+        async function loadTicketInfo() {
+            if (!bookingId) {
+                window.location.href = 'entry.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`../../backend/api/payment.php?action=getTicket&bookingId=${bookingId}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const ticket = result.ticket;
+                    document.getElementById('ticketInfo').innerHTML = `
+                        <div class="ticket-detail">
+                            <label>Ticket ID:</label>
+                            <span>${ticket.ticket_id || bookingId}</span>
+                        </div>
+                        <div class="ticket-detail">
+                            <label>Vehicle Number:</label>
+                            <span>${ticket.vehicle_number}</span>
+                        </div>
+                        <div class="ticket-detail">
+                            <label>Slot Number:</label>
+                            <span>${ticket.slot_number}</span>
+                        </div>
+                        <div class="ticket-detail">
+                            <label>Entry Time:</label>
+                            <span>${new Date(ticket.entry_time).toLocaleString()}</span>
+                        </div>
+                        <div class="ticket-detail">
+                            <label>Expiry Time:</label>
+                            <span>${new Date(ticket.expiry_time).toLocaleString()}</span>
+                        </div>
+                        <div class="ticket-detail">
+                            <label>Amount Paid:</label>
+                            <span>₹${ticket.amount_paid}</span>
+                        </div>
+                    `;
+
+                    // Generate QR code
+                    const qrData = JSON.stringify({
+                        bookingId: bookingId,
+                        vehicleNumber: ticket.vehicle_number,
+                        slotNumber: ticket.slot_number,
+                        entryTime: ticket.entry_time
+                    });
+
+                    document.getElementById('qrCode').innerHTML = '';
+                    new QRCode(document.getElementById('qrCode'), {
+                        text: qrData,
+                        width: 200,
+                        height: 200
+                    });
+                } else {
+                    document.getElementById('message').innerHTML = 
+                        '<div class="error">' + result.message + '</div>';
+                }
+            } catch (error) {
+                document.getElementById('message').innerHTML = 
+                    '<div class="error">An error occurred. Please try again.</div>';
+                console.error('Error:', error);
+            }
+        }
+
+        function downloadQR() {
+            const qrCanvas = document.querySelector('#qrCode canvas');
+            if (qrCanvas) {
+                const link = document.createElement('a');
+                link.download = 'parking-ticket-qr.png';
+                link.href = qrCanvas.toDataURL();
+                link.click();
+            }
+        }
+
+        loadTicketInfo();
+    </script>
+</body>
+</html>
+
+
+
+

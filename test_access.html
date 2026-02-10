@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Access - Smart Parking System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-box {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2563eb; }
+        a {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 5px;
+        }
+        a:hover { background: #1d4ed8; }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+    </style>
+</head>
+<body>
+    <h1>✅ Smart Parking System - Access Test</h1>
+    
+    <div class="test-box">
+        <h2>If you can see this page, your server is working!</h2>
+        <p>Current URL: <strong id="currentUrl"></strong></p>
+        <p class="success">✅ Server is running correctly</p>
+    </div>
+
+    <div class="test-box">
+        <h2>Quick Access Links:</h2>
+        <p>
+            <a href="frontend/user/entry.html">User Entry Page</a>
+            <a href="frontend/admin/login.html">Admin Login</a>
+            <a href="index.php">Main Index</a>
+        </p>
+    </div>
+
+    <div class="test-box">
+        <h2>File Structure Test:</h2>
+        <ul id="fileTests"></ul>
+    </div>
+
+    <div class="test-box">
+        <h2>Instructions:</h2>
+        <ol>
+            <li>If you see this page, your server is configured correctly</li>
+            <li>Click the links above to test access to other pages</li>
+            <li>If links don't work, check the URL path in your browser</li>
+            <li>Make sure you're accessing from the project root directory</li>
+        </ol>
+    </div>
+
+    <script>
+        // Display current URL
+        document.getElementById('currentUrl').textContent = window.location.href;
+        
+        // Test file access
+        const filesToTest = [
+            'frontend/user/entry.html',
+            'frontend/admin/login.html',
+            'backend/api/entry.php',
+            'index.php'
+        ];
+        
+        const fileTests = document.getElementById('fileTests');
+        
+        filesToTest.forEach(file => {
+            fetch(file, { method: 'HEAD' })
+                .then(response => {
+                    const li = document.createElement('li');
+                    if (response.ok) {
+                        li.innerHTML = `<span class="success">✅</span> ${file} - Accessible`;
+                    } else {
+                        li.innerHTML = `<span class="error">❌</span> ${file} - Not found (${response.status})`;
+                    }
+                    fileTests.appendChild(li);
+                })
+                .catch(error => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span class="error">❌</span> ${file} - Error: ${error.message}`;
+                    fileTests.appendChild(li);
+                });
+        });
+    </script>
+</body>
+</html>
+
+
+
+

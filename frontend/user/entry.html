@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Entry - Smart Parking System</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Smart Parking System</h1>
+            <nav>
+                <a href="entry.html" class="active">Entry</a>
+                <a href="slot.html">Select Slot</a>
+                <a href="exit.html">Exit</a>
+                <a href="user_dashboard.html">My Account</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="card">
+                <h2>Vehicle Entry</h2>
+                
+                <!-- RFID Entry Section -->
+                <div class="rfid-section" style="margin-bottom: 30px; padding: 20px; background-color: #f8fafc; border-radius: 8px; border-left: 4px solid #2563eb;">
+                    <h3 style="margin-bottom: 15px;">RFID Entry</h3>
+                    <form id="rfidForm">
+                        <div class="form-group">
+                            <label for="rfid">Scan or Enter RFID *</label>
+                            <input type="text" id="rfid" name="rfid" required 
+                                   placeholder="Scan RFID card or enter RFID number" 
+                                   autocomplete="off" autofocus>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Check RFID & Proceed</button>
+                    </form>
+                    <div id="rfidMessage" class="message" style="margin-top: 15px;"></div>
+                </div>
+
+                <div style="text-align: center; margin: 20px 0; color: #64748b;">
+                    <strong>OR</strong>
+                </div>
+
+                <!-- Manual Entry Form -->
+                <h3>Manual Entry</h3>
+                <p style="color: #64748b; margin-bottom: 10px;">
+                    To book parking, you must be logged in to your user account. This helps us keep track of your visit history.
+                </p>
+                <form id="entryForm">
+                    <div class="form-group">
+                        <label for="vehicleNumber">Vehicle Number *</label>
+                        <input type="text" id="vehicleNumber" name="vehicleNumber" required 
+                               placeholder="e.g., ABC-1234" pattern="[A-Z]{2,3}-[0-9]{4}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vehicleType">Vehicle Type *</label>
+                        <select id="vehicleType" name="vehicleType" required>
+                            <option value="">Select Type</option>
+                            <option value="car">🚗 Car</option>
+                            <option value="motorcycle">🏍️ Motorcycle</option>
+                            <option value="truck">🚛 Truck</option>
+                            <option value="van">🚐 Van</option>
+                            <option value="electric">⚡ Electric Vehicle (EV)</option>
+                        </select>
+                    </div>
+
+                    <!-- Company Selection (shown only when vehicle type is selected) -->
+                    <div class="form-group" id="companyGroup" style="display: none;">
+                        <label for="vehicleCompany">Company/Brand *</label>
+                        <select id="vehicleCompany" name="vehicleCompany" required>
+                            <option value="">Select Company</option>
+                        </select>
+                    </div>
+
+                    <!-- Model Selection (shown only when company is selected) -->
+                    <div class="form-group" id="modelGroup" style="display: none;">
+                        <label for="vehicleModel">Model *</label>
+                        <select id="vehicleModel" name="vehicleModel" required>
+                            <option value="">Select Model</option>
+                        </select>
+                        <small id="modelInfo" style="color: #667eea; margin-top: 5px;"></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ownerName">Owner Name *</label>
+                        <input type="text" id="ownerName" name="ownerName" required 
+                               placeholder="Enter owner name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phoneNumber">Phone Number *</label>
+                        <input type="tel" id="phoneNumber" name="phoneNumber" required 
+                               placeholder="e.g., +1234567890">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="entryTime">Entry Time</label>
+                        <input type="datetime-local" id="entryTime" name="entryTime" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Register Vehicle</button>
+                </form>
+
+                <div id="message" class="message"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../assets/js/main.js"></script>
+    <script src="../assets/js/vehicle-data.js"></script>
+    <script>
+        // Require user login before booking
+        const currentUserEmail = localStorage.getItem('userEmail') || '';
+        const currentUserId = localStorage.getItem('userId');
+
+        if (!currentUserId) {
+            // Not logged in – redirect to user login
+            window.location.href = 'login.html';
+        }
+
+        // Set default entry time to current local time
+        function setCurrentDateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            document.getElementById('entryTime').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+        
+        setCurrentDateTime();
+
+        // Handle vehicle type change
+        document.getElementById('vehicleType').addEventListener('change', function() {
+            const vehicleType = this.value;
+            const companySelect = document.getElementById('vehicleCompany');
+            const modelSelect = document.getElementById('vehicleModel');
+            const companyGroup = document.getElementById('companyGroup');
+            const modelGroup = document.getElementById('modelGroup');
+
+            // Reset selections
+            companySelect.innerHTML = '<option value="">Select Company</option>';
+            modelSelect.innerHTML = '<option value="">Select Model</option>';
+
+            if (vehicleType) {
+                // Show company selection
+                companyGroup.style.display = 'block';
+                
+                // Populate companies for selected vehicle type
+                const companies = getCompaniesForType(vehicleType);
+                for (const [key, company] of Object.entries(companies)) {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = company.name;
+                    companySelect.appendChild(option);
+                }
+
+                // Add "Other/Not in List" option
+                const otherOption = document.createElement('option');
+                otherOption.value = 'other';
+                otherOption.textContent = '❓ Other/Not in List';
+                companySelect.appendChild(otherOption);
+            } else {
+                companyGroup.style.display = 'none';
+                modelGroup.style.display = 'none';
+            }
+        });
+
+        // Handle company change
+        document.getElementById('vehicleCompany').addEventListener('change', function() {
+            const vehicleType = document.getElementById('vehicleType').value;
+            const companyKey = this.value;
+            const modelSelect = document.getElementById('vehicleModel');
+            const modelGroup = document.getElementById('modelGroup');
+            const modelInfo = document.getElementById('modelInfo');
+
+            modelSelect.innerHTML = '<option value="">Select Model</option>';
+
+            if (companyKey === 'other') {
+                // Show input for custom company and model
+                modelGroup.style.display = 'none';
+                
+                // Create custom input fields
+                let customGroupDiv = document.getElementById('customVehicleGroup');
+                if (!customGroupDiv) {
+                    customGroupDiv = document.createElement('div');
+                    customGroupDiv.id = 'customVehicleGroup';
+                    customGroupDiv.innerHTML = `
+                        <div class="form-group">
+                            <label for="customCompany">Company Name *</label>
+                            <input type="text" id="customCompany" name="customCompany" 
+                                   placeholder="Enter company name" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px;">
+                        </div>
+                        <div class="form-group">
+                            <label for="customModel">Model Name *</label>
+                            <input type="text" id="customModel" name="customModel" 
+                                   placeholder="Enter model name" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px;">
+                        </div>
+                        <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 12px; border-radius: 6px; margin: 10px 0; color: #856404;">
+                            ⚠️ <strong>Security Note:</strong> Custom vehicles not in our database may require additional verification and inspection.
+                        </div>
+                    `;
+                    document.querySelector('#companyGroup').parentNode.insertBefore(customGroupDiv, document.getElementById('companyGroup').nextSibling);
+                }
+                customGroupDiv.style.display = 'block';
+            } else if (companyKey) {
+                // Hide custom input fields if visible
+                const customGroupDiv = document.getElementById('customVehicleGroup');
+                if (customGroupDiv) {
+                    customGroupDiv.style.display = 'none';
+                }
+
+                // Show model selection for registered companies
+                modelGroup.style.display = 'block';
+                const models = getModelsForCompany(vehicleType, companyKey);
+                
+                models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model;
+                    option.textContent = '✓ ' + model;
+                    modelSelect.appendChild(option);
+                });
+
+                modelInfo.textContent = '✅ Registered vehicle - High security';
+                modelInfo.style.color = '#4CAF50';
+            } else {
+                modelGroup.style.display = 'none';
+                const customGroupDiv = document.getElementById('customVehicleGroup');
+                if (customGroupDiv) {
+                    customGroupDiv.style.display = 'none';
+                }
+            }
+        });
+
+        // Handle model change
+        document.getElementById('vehicleModel').addEventListener('change', function() {
+            const modelInfo = document.getElementById('modelInfo');
+            if (this.value) {
+                modelInfo.textContent = '✅ Registered model - Premium security';
+                modelInfo.style.color = '#4CAF50';
+            }
+        });
+
+        // Handle RFID form submission
+        document.getElementById('rfidForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const rfidInput = document.getElementById('rfid');
+            const rfid = rfidInput.value.trim();
+            const messageDiv = document.getElementById('rfidMessage');
+            const submitButton = this.querySelector('button[type="submit"]');
+            
+            if (!rfid) {
+                messageDiv.innerHTML = '<div class="error">Please enter or scan RFID</div>';
+                return;
+            }
+            
+            // Disable submit button and show loading
+            submitButton.disabled = true;
+            submitButton.textContent = 'Processing...';
+            messageDiv.innerHTML = '<div class="success">Checking RFID...</div>';
+            
+            try {
+                const response = await fetch('../../backend/api/rfid_entry.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ rfid: rfid })
+                });
+
+                const result = await response.json();
+                
+                // Re-enable button
+                submitButton.disabled = false;
+                submitButton.textContent = 'Check RFID & Proceed';
+                
+                if (result.blocked) {
+                    // Vehicle is stolen - show alert and block entry
+                    const alertMessage = `ENTRY BLOCKED!\n\n` +
+                        `Vehicle: ${result.vehicle.vehicle_number}\n` +
+                        `Type: ${result.vehicle.vehicle_type}\n` +
+                        `Company: ${result.vehicle.company}\n` +
+                        `Model: ${result.vehicle.model}\n\n` +
+                        `This vehicle is reported as stolen.\n` +
+                        `Police Case: ${result.stolen_vehicle_info?.police_case_number || 'N/A'}\n` +
+                        `Police Station: ${result.stolen_vehicle_info?.police_station || 'N/A'}\n\n` +
+                        `Entry has been automatically blocked and an alert has been created.`;
+                    
+                    alert(alertMessage);
+                    
+                    messageDiv.innerHTML = 
+                        '<div class="error">' + 
+                        '<strong>ENTRY BLOCKED:</strong> ' + result.message + 
+                        '<br><small>Vehicle is reported as stolen. Please contact security.</small>' +
+                        '</div>';
+                    
+                    // Clear RFID input
+                    rfidInput.value = '';
+                    rfidInput.focus();
+                    
+                } else if (result.success) {
+                    // Entry allowed - redirect to slot selection
+                    messageDiv.innerHTML = 
+                        '<div class="success">Entry allowed! Redirecting to slot selection...</div>';
+                    
+                    // Store vehicle info in sessionStorage for slot page
+                    sessionStorage.setItem('vehicleId', result.vehicle.id);
+                    sessionStorage.setItem('vehicleNumber', result.vehicle.vehicle_number);
+                    sessionStorage.setItem('vehicleType', result.vehicle.vehicle_type);
+                    
+                    // Redirect to slot selection page
+                    setTimeout(() => {
+                        window.location.href = 'slot.html?vehicleId=' + result.vehicle.id;
+                    }, 1500);
+                } else {
+                    // Error occurred
+                    messageDiv.innerHTML = 
+                        '<div class="error">' + (result.message || 'An error occurred. Please try again.') + '</div>';
+                    rfidInput.focus();
+                }
+            } catch (error) {
+                // Re-enable button
+                submitButton.disabled = false;
+                submitButton.textContent = 'Check RFID & Proceed';
+                
+                messageDiv.innerHTML = 
+                    '<div class="error">An error occurred. Please try again.</div>';
+                console.error('RFID Entry Error:', error);
+                rfidInput.focus();
+            }
+        });
+
+        // Auto-focus RFID input on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const rfidInput = document.getElementById('rfid');
+            if (rfidInput) {
+                rfidInput.focus();
+            }
+        });
+
+        // Handle manual form submission
+        document.getElementById('entryForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            // Validate company and model selection
+            const vehicleType = data.vehicleType;
+            const vehicleCompany = data.vehicleCompany;
+            
+            if (!vehicleCompany) {
+                document.getElementById('message').innerHTML = 
+                    '<div class="error">❌ Please select a company/brand</div>';
+                document.getElementById('vehicleCompany').focus();
+                return;
+            }
+
+            if (vehicleCompany === 'other') {
+                // For custom vehicles
+                const customCompany = document.getElementById('customCompany')?.value;
+                const customModel = document.getElementById('customModel')?.value;
+                
+                if (!customCompany || !customModel) {
+                    document.getElementById('message').innerHTML = 
+                        '<div class="error">❌ Please enter company name and model name</div>';
+                    return;
+                }
+                
+                data.vehicleCompany = customCompany;
+                data.vehicleModel = customModel;
+                data.isCustomVehicle = true;
+            } else {
+                // For registered vehicles
+                const vehicleModel = data.vehicleModel;
+                if (!vehicleModel) {
+                    document.getElementById('message').innerHTML = 
+                        '<div class="error">❌ Please select a model</div>';
+                    document.getElementById('vehicleModel').focus();
+                    return;
+                }
+                
+                // Get company name
+                const companies = getCompaniesForType(vehicleType);
+                const companyName = companies[vehicleCompany]?.name || vehicleCompany;
+                data.vehicleCompanyName = companyName;
+                data.isCustomVehicle = false;
+            }
+
+            // Attach logged-in user email so vehicle can be linked for history
+            if (currentUserEmail) {
+                data.userEmail = currentUserEmail;
+            }
+
+            try {
+                const response = await fetch('../../backend/api/entry.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('message').innerHTML = 
+                        '<div class="success">✅ Vehicle registered successfully! Redirecting...</div>';
+                    setTimeout(() => {
+                        window.location.href = 'slot.html?vehicleId=' + result.vehicleId;
+                    }, 2000);
+                } else {
+                    document.getElementById('message').innerHTML = 
+                        '<div class="error">❌ ' + result.message + '</div>';
+                }
+            } catch (error) {
+                document.getElementById('message').innerHTML = 
+                    '<div class="error">❌ An error occurred. Please try again.</div>';
+                console.error('Error:', error);
+            }
+        });
+    </script>
+</body>
+</html>
+

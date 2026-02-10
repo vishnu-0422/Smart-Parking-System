@@ -1,0 +1,49 @@
+================================================================================
+  SMART PARKING SYSTEM - HOW TO START THE SERVER
+================================================================================
+
+EASIEST METHOD (Recommended):
+-----------------------------
+1. Open File Explorer (Windows Key + E)
+2. Go to: Desktop → smart parking system
+3. Double-click: start_server_xampp.bat
+4. A black window will open - KEEP IT OPEN!
+5. Open browser: http://localhost:8000/frontend/user/entry.html
+
+================================================================================
+
+ALTERNATIVE METHOD (Command Prompt):
+------------------------------------
+1. Press Windows Key + R
+2. Type: cmd
+3. Press Enter
+4. Type these commands (one at a time, press Enter after each):
+
+   cd "C:\Users\Marellavishnuvardhan\Desktop\smart parking system"
+   
+   C:\xampp\php\php.exe -S localhost:8000
+
+5. Keep the window open!
+6. Open browser: http://localhost:8000/frontend/user/entry.html
+
+================================================================================
+
+IMPORTANT:
+----------
+- DO NOT close the command window (server will stop)
+- Wait for "Listening on http://localhost:8000" message
+- Then open your browser
+
+================================================================================
+
+TEST URLS:
+----------
+Test Page:     http://localhost:8000/test_access.html
+User Entry:    http://localhost:8000/frontend/user/entry.html
+Admin Login:   http://localhost:8000/frontend/admin/login.html
+
+================================================================================
+
+
+
+

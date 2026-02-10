@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - Smart Parking System</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Smart Parking System - User Dashboard</h1>
+            <nav>
+                <a href="user_dashboard.html" class="active">Dashboard</a>
+                <a href="entry.html">Book Parking</a>
+                <a href="extend.html">Extend Time</a>
+                <a href="exit.html">Exit</a>
+                <a href="#" id="logoutLink">Logout</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <h3>Total Visits</h3>
+                    <div class="stat-value" id="totalVisits">-</div>
+                    <div class="stat-label">How many times you have parked</div>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Total Amount Spent</h3>
+                    <div class="stat-value" id="totalAmount">₹0.00</div>
+                    <div class="stat-label">Across all your completed visits</div>
+                </div>
+            </div>
+
+            <!-- Parking Layout Section -->
+            <div class="dashboard-section">
+                <h2>🅿️ Parking Lot Overview</h2>
+                <p style="color: #64748b; margin-bottom: 15px;">
+                    Real-time view of parking availability - Green slots are available, Red slots are occupied.
+                </p>
+
+                <!-- Parking Statistics Cards -->
+                <div class="parking-stats-grid">
+                    <div class="parking-stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-label">Total Slots</div>
+                        <div class="stat-number" id="userTotalSlotsCount">0</div>
+                    </div>
+                    <div class="parking-stat-card">
+                        <div class="stat-icon">🟢</div>
+                        <div class="stat-label">Available</div>
+                        <div class="stat-number" id="userAvailableSlotsCountStat">0</div>
+                    </div>
+                    <div class="parking-stat-card">
+                        <div class="stat-icon">🔴</div>
+                        <div class="stat-label">Occupied</div>
+                        <div class="stat-number" id="userOccupiedSlotsCount">0</div>
+                    </div>
+                    <div class="parking-stat-card">
+                        <div class="stat-icon">🟡</div>
+                        <div class="stat-label">Maintenance</div>
+                        <div class="stat-number" id="userMaintenanceSlotsCount">0</div>
+                    </div>
+                </div>
+
+                <!-- Parking Summary Section -->
+                <div class="parking-summary-box">
+                    <h3 style="margin-bottom: 15px; color: var(--dark-color);">Parking Status Summary</h3>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <span class="summary-icon">📊</span>
+                            <div class="summary-content">
+                                <div class="summary-label">Total Slots Available</div>
+                                <div class="summary-value" id="summaryTotalSlots">0</div>
+                            </div>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-icon">🟢</span>
+                            <div class="summary-content">
+                                <div class="summary-label">Free Slots</div>
+                                <div class="summary-value" id="summaryAvailableSlots">0</div>
+                            </div>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-icon">🔴</span>
+                            <div class="summary-content">
+                                <div class="summary-label">Occupied Slots</div>
+                                <div class="summary-value" id="summaryOccupiedSlots">0</div>
+                            </div>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-icon">🟡</span>
+                            <div class="summary-content">
+                                <div class="summary-label">Under Maintenance</div>
+                                <div class="summary-value" id="summaryMaintenanceSlots">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Occupancy Rate -->
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="color: var(--text-light); font-size: 14px;">Occupancy Rate</span>
+                            <span style="font-weight: 600; color: var(--primary-color);" id="occupancyPercentage">0%</span>
+                        </div>
+                        <div style="width: 100%; height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden;">
+                            <div id="occupancyBar" style="height: 100%; background: linear-gradient(90deg, #10b981 0%, #f59e0b 50%, #ef4444 100%); width: 0%; transition: width 0.3s;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layout-info">
+                    <div class="info-item">
+                        <span class="legend-box available"></span>
+                        <span>Available</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="legend-box occupied"></span>
+                        <span>Occupied</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="legend-box maintenance"></span>
+                        <span>Maintenance</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="legend-box electric"></span>
+                        <span>⚡ EV Charging</span>
+                    </div>
+                </div>
+
+                <div class="parking-layout">
+                    <!-- Entry Points -->
+                    <div class="entry-section">
+                        <div class="section-label">ENTRY →</div>
+                    </div>
+
+                    <!-- Front Row -->
+                    <div class="parking-zone">
+                        <div class="zone-header">Front Row (Quick Access)</div>
+                        <div id="userFrontSlotsContainer" class="slots-row">
+                            <!-- Slots will be loaded here -->
+                        </div>
+                        <div class="zone-footer" id="userFrontSlotsStats">Front: 0/0</div>
+                    </div>
+
+                    <!-- Middle Row -->
+                    <div class="parking-zone">
+                        <div class="zone-header">Middle Row (Standard)</div>
+                        <div id="userMiddleSlotsContainer" class="slots-row">
+                            <!-- Slots will be loaded here -->
+                        </div>
+                        <div class="zone-footer" id="userMiddleSlotsStats">Middle: 0/0</div>
+                    </div>
+
+                    <!-- Last Row -->
+                    <div class="parking-zone">
+                        <div class="zone-header">Last Row (Extended)</div>
+                        <div id="userLastSlotsContainer" class="slots-row">
+                            <!-- Slots will be loaded here -->
+                        </div>
+                        <div class="zone-footer" id="userLastSlotsStats">Last: 0/0</div>
+                    </div>
+
+                    <!-- Exit Points -->
+                    <div class="exit-section">
+                        <div class="section-label">← EXIT</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-section">
+                <h2>Parking History</h2>
+                <p style="color: #64748b; margin-bottom: 10px;">
+                    Here you can see the history of your parking visits – when you parked, which vehicle, slot details, and how much you paid.
+                </p>
+                <div class="table-container">
+                    <table id="historyTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Vehicle</th>
+                                <th>Type</th>
+                                <th>Slot</th>
+                                <th>Entry Time</th>
+                                <th>Exit Time</th>
+                                <th>Amount Paid (₹)</th>
+                                <th>Payment Method</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="8">Loading history...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Extend Parking Section -->
+            <div class="dashboard-section" id="extendParkingSection">
+                <h2>⏱️ Extend Parking Time</h2>
+                <p style="color: #64748b; margin-bottom: 15px;">
+                    Need more time to park? Extend your parking duration and pay for the additional hours.
+                </p>
+                <div class="quick-actions-grid">
+                    <div class="action-card">
+                        <div class="action-icon">🚗</div>
+                        <div class="action-content">
+                            <h3>Extend Parking</h3>
+                            <p>Add more hours to your current parking session</p>
+                            <a href="extend.html" class="btn btn-primary">Go to Extend</a>
+                        </div>
+                    </div>
+                    <div class="action-card">
+                        <div class="action-icon">💳</div>
+                        <div class="action-content">
+                            <h3>Payment Methods</h3>
+                            <p>View and manage your saved payment methods</p>
+                            <a href="payment.html" class="btn btn-secondary">Manage</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../assets/js/main.js"></script>
+    <script>
+        // Simple auth check
+        const userId = localStorage.getItem('userId');
+        const userName = localStorage.getItem('userName') || 'User';
+
+        if (!userId) {
+            // Not logged in
+            window.location.href = 'login.html';
+        }
+
+        // Update welcome text in header if needed
+        document.title = userName + ' - User Dashboard - Smart Parking System';
+
+        // Logout
+        document.getElementById('logoutLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userEmail');
+            window.location.href = 'login.html';
+        });
+
+        // Load parking history
+        async function loadHistory() {
+            const tbody = document.querySelector('#historyTable tbody');
+            tbody.innerHTML = '<tr><td colspan="8">Loading history...</td></tr>';
+
+            try {
+                const response = await fetch(`../../backend/api/user.php?action=history&userId=${encodeURIComponent(userId)}`);
+                const result = await response.json();
+
+                if (!result.success) {
+                    tbody.innerHTML = '<tr><td colspan="8">No history found or failed to load history.</td></tr>';
+                    return;
+                }
+
+                const history = Array.isArray(result.history) ? result.history : [];
+                const summary = result.summary || { total_visits: 0, total_amount: 0 };
+
+                document.getElementById('totalVisits').textContent = summary.total_visits || 0;
+                document.getElementById('totalAmount').textContent = Utils.formatCurrency(summary.total_amount || 0);
+
+                if (history.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8">You have not parked yet. Book your first parking from the “Book Parking” menu.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+
+                history.forEach(item => {
+                    const tr = document.createElement('tr');
+                    const entryDate = item.entry_time ? new Date(item.entry_time) : null;
+                    const exitDate = item.exit_time ? new Date(item.exit_time) : null;
+
+                    const amountNum = parseFloat(item.amount_paid || 0);
+
+                    tr.innerHTML = `
+                        <td>${entryDate ? entryDate.toLocaleDateString() : '-'}</td>
+                        <td>${item.vehicle_number}</td>
+                        <td>${item.vehicle_type}</td>
+                        <td>${item.slot_number}</td>
+                        <td>${entryDate ? entryDate.toLocaleTimeString() : '-'}</td>
+                        <td>${exitDate ? exitDate.toLocaleTimeString() : '-'}</td>
+                        <td>${amountNum.toFixed(2)}</td>
+                        <td>${item.payment_method || '-'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Error loading user history:', error);
+                tbody.innerHTML = '<tr><td colspan="8">An error occurred while loading history.</td></tr>';
+            }
+        }
+
+        // Load parking layout
+        async function loadParkingLayout() {
+            try {
+                console.log('Loading parking layout...');
+                const response = await fetch('../../backend/api/admin.php?action=getSlots', {
+                    headers: {
+                        'Authorization': 'Bearer ' + (localStorage.getItem('adminToken') || '')
+                    }
+                });
+                
+                console.log('Response status:', response.status);
+                const result = await response.json();
+                console.log('API Response:', result);
+
+                if (result.success && Array.isArray(result.slots)) {
+                    console.log('Slots received:', result.slots.length);
+                    displayUserParkingLayout(result.slots);
+                } else {
+                    console.warn('Failed to load slots - using fallback');
+                    // Try alternative endpoint
+                    const fallbackResponse = await fetch('../../backend/api/slot.php?action=getAvailable');
+                    const fallbackResult = await fallbackResponse.json();
+                    if (fallbackResult.success && Array.isArray(fallbackResult.slots)) {
+                        displayUserParkingLayout(fallbackResult.slots);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading parking layout:', error);
+            }
+        }
+
+        function displayUserParkingLayout(slots) {
+            console.log('Displaying parking layout with slots:', slots);
+            
+            if (!slots || slots.length === 0) {
+                console.warn('No slots data received');
+                return;
+            }
+
+            const frontSlots = [];
+            const middleSlots = [];
+            const lastSlots = [];
+            let available = 0;
+            let occupied = 0;
+            let maintenance = 0;
+
+            slots.forEach((slot, index) => {
+                if (slot.status === 'available') available++;
+                if (slot.status === 'occupied') occupied++;
+                if (slot.status === 'maintenance') maintenance++;
+
+                // Distribute slots evenly across 3 zones using ID or position
+                const slotPosition = slot.id ? (slot.id % 30) : (index % 30);
+                if (slotPosition <= 9) {
+                    frontSlots.push(slot);
+                } else if (slotPosition <= 19) {
+                    middleSlots.push(slot);
+                } else {
+                    lastSlots.push(slot);
+                }
+            });
+
+            console.log('Slot distribution - Front:', frontSlots.length, 'Middle:', middleSlots.length, 'Last:', lastSlots.length);
+            console.log('Slot status - Available:', available, 'Occupied:', occupied, 'Maintenance:', maintenance);
+
+            // Update statistics cards
+            document.getElementById('userTotalSlotsCount').textContent = slots.length;
+            document.getElementById('userAvailableSlotsCountStat').textContent = available;
+            document.getElementById('userOccupiedSlotsCount').textContent = occupied;
+            document.getElementById('userMaintenanceSlotsCount').textContent = maintenance;
+
+            // Update summary section
+            document.getElementById('summaryTotalSlots').textContent = slots.length;
+            document.getElementById('summaryAvailableSlots').textContent = available;
+            document.getElementById('summaryOccupiedSlots').textContent = occupied;
+            document.getElementById('summaryMaintenanceSlots').textContent = maintenance;
+
+            // Calculate and display occupancy rate
+            const occupancyRate = slots.length > 0 ? Math.round((occupied / slots.length) * 100) : 0;
+            document.getElementById('occupancyPercentage').textContent = occupancyRate + '%';
+            document.getElementById('occupancyBar').style.width = occupancyRate + '%';
+
+            displayUserSlotsZone('userFrontSlotsContainer', frontSlots, 'Front');
+            displayUserSlotsZone('userMiddleSlotsContainer', middleSlots, 'Middle');
+            displayUserSlotsZone('userLastSlotsContainer', lastSlots, 'Last');
+        }
+
+        function displayUserSlotsZone(containerId, slots, zoneName) {
+            console.log(`Rendering ${zoneName} zone with ${slots.length} slots`);
+            
+            const container = document.getElementById(containerId);
+            if (!container) {
+                console.error(`Container not found: ${containerId}`);
+                return;
+            }
+
+            container.innerHTML = '';
+
+            if (!slots || slots.length === 0) {
+                console.warn(`No slots in ${zoneName} zone`);
+                container.innerHTML = '<p style="text-align: center; color: #64748b; padding: 20px;">No slots in this zone</p>';
+                const statsElement = document.getElementById('user' + zoneName + 'SlotsStats');
+                if (statsElement) {
+                    statsElement.textContent = `${zoneName}: 0/0`;
+                }
+                return;
+            }
+
+            let occupied = 0;
+            let available = 0;
+            
+            slots.forEach(slot => {
+                if (!slot) return;
+                
+                const slotEl = document.createElement('div');
+                // Add both vehicle type and status classes
+                const vehicleType = slot.slot_type ? slot.slot_type.toLowerCase() : 'car';
+                const status = slot.status || 'available';
+                slotEl.className = `layout-slot ${vehicleType} ${status}`;
+                slotEl.title = `${slot.slot_number || 'Unknown'} - ${slot.slot_type || 'N/A'}`;
+                slotEl.innerHTML = `
+                    <div class="slot-label">${slot.slot_number || '-'}</div>
+                    <div class="slot-type-mini">${slot.slot_type ? slot.slot_type.substring(0, 3).toUpperCase() : 'N/A'}</div>
+                `;
+                container.appendChild(slotEl);
+
+                if (status === 'occupied') occupied++;
+                if (status === 'available') available++;
+            });
+
+            const statsElement = document.getElementById('user' + zoneName + 'SlotsStats');
+            if (statsElement) {
+                statsElement.textContent = `${zoneName}: ${occupied}/${slots.length} (Free: ${available})`;
+                console.log(`${zoneName} stats updated: ${occupied}/${slots.length}`);
+            }
+        }
+
+        loadHistory();
+        loadParkingLayout();
+    </script>
+</body>
+</html>
+
+

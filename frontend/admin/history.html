@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking History - Admin - Smart Parking System</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Smart Parking System - Admin Dashboard</h1>
+            <nav>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="slots.html">Slots</a>
+                <a href="vehicles.html">Vehicles</a>
+                <a href="alerts.html">Alerts</a>
+                <a href="history.html" class="active">Parking History</a>
+                <a href="feedback.html">Feedback</a>
+                <a href="#" onclick="logout()">Logout</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="dashboard-section">
+                <h2>All Parking History</h2>
+                <p style="color: #64748b; margin-bottom: 10px;">
+                    This table shows all parking bookings: vehicle details, slot, entry/exit time, payment status and amount.
+                </p>
+
+                <div class="filters">
+                    <select id="filterStatus">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="completed">Completed</option>
+                        <option value="failed">Failed</option>
+                    </select>
+                    <select id="filterPaymentMethod">
+                        <option value="">All Payment Methods</option>
+                        <option value="cash">Cash</option>
+                        <option value="card">Card</option>
+                        <option value="mobile">Mobile / UPI</option>
+                    </select>
+                </div>
+
+                <div class="table-container">
+                    <table id="historyTable">
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Vehicle</th>
+                                <th>Owner</th>
+                                <th>Phone</th>
+                                <th>Type</th>
+                                <th>Slot</th>
+                                <th>Entry Time</th>
+                                <th>Exit Time</th>
+                                <th>Amount (₹)</th>
+                                <th>Payment Method</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="11">Loading history...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../assets/js/main.js"></script>
+    <script>
+        // Check authentication
+        if (!localStorage.getItem('adminToken')) {
+            window.location.href = 'login.html';
+        }
+
+        let fullHistory = [];
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            window.location.href = 'login.html';
+        }
+
+        // Get vehicle type icon
+        function getVehicleTypeIcon(vehicleType) {
+            const icons = {
+                'motorcycle': '🏍️',
+                'car': '🚗',
+                'van': '🚐',
+                'truck': '🚚',
+                'ev': '⚡',
+                'electric': '⚡'
+            };
+            return icons[vehicleType?.toLowerCase()] || '🚗';
+        }
+
+        async function loadHistory() {
+            const tbody = document.querySelector('#historyTable tbody');
+            tbody.innerHTML = '<tr><td colspan="11">Loading history...</td></tr>';
+
+            try {
+                const response = await fetch('../../backend/api/admin.php?action=getHistory', {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
+                    }
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    tbody.innerHTML = '<tr><td colspan="11">Failed to load history.</td></tr>';
+                    return;
+                }
+
+                fullHistory = Array.isArray(result.history) ? result.history : [];
+                renderHistory();
+            } catch (error) {
+                console.error('Error loading admin history:', error);
+                tbody.innerHTML = '<tr><td colspan="11">An error occurred while loading history.</td></tr>';
+            }
+        }
+
+        function renderHistory() {
+            const tbody = document.querySelector('#historyTable tbody');
+            tbody.innerHTML = '';
+
+            const statusFilter = document.getElementById('filterStatus').value;
+            const methodFilter = document.getElementById('filterPaymentMethod').value;
+
+            const filtered = fullHistory.filter(item => {
+                if (statusFilter && item.payment_status !== statusFilter) {
+                    return false;
+                }
+                if (methodFilter && item.payment_method !== methodFilter) {
+                    return false;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11">No history found for selected filters.</td></tr>';
+                return;
+            }
+
+            filtered.forEach(item => {
+                const tr = document.createElement('tr');
+                const entryDate = item.entry_time ? new Date(item.entry_time) : null;
+                const exitDate = item.exit_time ? new Date(item.exit_time) : null;
+                const amountNum = parseFloat(item.amount_paid || 0);
+
+                tr.innerHTML = `
+                    <td>${item.booking_id}</td>
+                    <td>${item.vehicle_number}</td>
+                    <td>${item.owner_name || '-'}</td>
+                    <td>${item.phone_number || '-'}</td>
+                    <td><span title="${item.vehicle_type}">${getVehicleTypeIcon(item.vehicle_type)} ${item.vehicle_type}</span></td>
+                    <td>${item.slot_number || '-'}</td>
+                    <td>${entryDate ? entryDate.toLocaleString() : '-'}</td>
+                    <td>${exitDate ? exitDate.toLocaleString() : '-'}</td>
+                    <td>${amountNum.toFixed(2)}</td>
+                    <td>${item.payment_method || '-'}</td>
+                    <td>${item.payment_status || '-'}</td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('filterStatus').addEventListener('change', renderHistory);
+        document.getElementById('filterPaymentMethod').addEventListener('change', renderHistory);
+
+        loadHistory();
+    </script>
+</body>
+</html>
+
+
+

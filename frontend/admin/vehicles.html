@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicles - Admin Dashboard</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        .vehicles-container {
+            padding: 20px;
+        }
+
+        .search-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-filters input,
+        .search-filters select {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .search-filters input:focus,
+        .search-filters select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+        }
+
+        .vehicles-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .summary-card .value {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead tr {
+            background: #f8f9fa;
+            border-bottom: 2px solid #ddd;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #eee;
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        td {
+            padding: 15px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .vehicle-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-car {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .badge-motorcycle {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .badge-truck {
+            background: #fce4ec;
+            color: #c2185b;
+        }
+
+        .badge-van {
+            background: #e0f2f1;
+            color: #00796b;
+        }
+
+        .badge-electric {
+            background: #fff9c4;
+            color: #f57f17;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-buttons button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .btn-view {
+            background: #2196F3;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: #1976d2;
+        }
+
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #da190b;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .vehicle-number {
+            font-weight: 600;
+            color: #333;
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        .phone-number {
+            font-family: monospace;
+            color: #666;
+        }
+
+        .email-text {
+            font-size: 12px;
+            color: #666;
+            word-break: break-all;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .search-filters {
+                flex-direction: column;
+            }
+
+            .search-filters input,
+            .search-filters select {
+                width: 100%;
+            }
+
+            .vehicles-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            th, td {
+                padding: 10px;
+                font-size: 12px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-buttons button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Smart Parking System - Admin Dashboard</h1>
+            <nav>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="slots.html">Slots</a>
+                <a href="vehicles.html" class="active">Vehicles</a>
+                <a href="alerts.html">Alerts</a>
+                <a href="feedback.html">Feedback</a>
+                <a href="#" onclick="logout()">Logout</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="vehicles-container">
+                <h2>All Registered Vehicles</h2>
+
+                <div class="vehicles-summary">
+                    <div class="summary-card">
+                        <h3>Total Vehicles</h3>
+                        <div class="stat-value" id="totalVehicles">-</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Cars</h3>
+                        <div class="stat-value" id="totalCars">-</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Motorcycles</h3>
+                        <div class="stat-value" id="totalMotorcycles">-</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Electric Vehicles</h3>
+                        <div class="stat-value" id="totalEVs">-</div>
+                    </div>
+                </div>
+
+                <div class="search-filters">
+                    <input type="text" id="searchInput" placeholder="Search by vehicle number, owner name, phone...">
+                    <select id="vehicleTypeFilter">
+                        <option value="">All Vehicle Types</option>
+                        <option value="car">🚗 Car</option>
+                        <option value="motorcycle">🏍️ Motorcycle</option>
+                        <option value="truck">🚛 Truck</option>
+                        <option value="van">🚐 Van</option>
+                        <option value="electric">⚡ Electric</option>
+                    </select>
+                    <button onclick="loadVehicles()" class="btn btn-primary">Refresh</button>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-wrapper">
+                        <table id="vehiclesTable">
+                            <thead>
+                                <tr>
+                                    <th>Vehicle Number</th>
+                                    <th>Type</th>
+                                    <th>Owner Name</th>
+                                    <th>Phone</th>
+                                    <th>Email</th>
+                                    <th>Total Bookings</th>
+                                    <th>Last Entry</th>
+                                    <th>Registered</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="9" style="text-align: center; padding: 40px;">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../assets/js/main.js"></script>
+    <script>
+        // Check authentication
+        if (!localStorage.getItem('adminToken')) {
+            window.location.href = 'login.html';
+        }
+
+        let allVehicles = [];
+
+        async function loadVehicles() {
+            try {
+                const response = await fetch('../../backend/api/admin.php?action=getVehicles', {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success && result.vehicles) {
+                    allVehicles = result.vehicles;
+                    updateStats();
+                    displayVehicles(allVehicles);
+                    console.log('Vehicles loaded:', allVehicles);
+                } else {
+                    console.error('Failed to load vehicles:', result);
+                    document.querySelector('#vehiclesTable tbody').innerHTML = 
+                        '<tr><td colspan="9" class="no-data">Failed to load vehicles</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading vehicles:', error);
+                document.querySelector('#vehiclesTable tbody').innerHTML = 
+                    '<tr><td colspan="9" class="no-data">Error loading vehicles</td></tr>';
+            }
+        }
+
+        function updateStats() {
+            const total = allVehicles.length;
+            const cars = allVehicles.filter(v => v.vehicle_type === 'car').length;
+            const motorcycles = allVehicles.filter(v => v.vehicle_type === 'motorcycle').length;
+            const evs = allVehicles.filter(v => v.vehicle_type === 'electric').length;
+
+            document.getElementById('totalVehicles').textContent = total;
+            document.getElementById('totalCars').textContent = cars;
+            document.getElementById('totalMotorcycles').textContent = motorcycles;
+            document.getElementById('totalEVs').textContent = evs;
+        }
+
+        function displayVehicles(vehicles) {
+            const tbody = document.querySelector('#vehiclesTable tbody');
+
+            if (vehicles.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="no-data">No vehicles found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = vehicles.map(vehicle => {
+                const typeMap = {
+                    'car': '🚗 Car',
+                    'motorcycle': '🏍️ Motorcycle',
+                    'truck': '🚛 Truck',
+                    'van': '🚐 Van',
+                    'electric': '⚡ Electric'
+                };
+
+                const badgeClass = `badge-${vehicle.vehicle_type}`;
+                const typeLabel = typeMap[vehicle.vehicle_type] || vehicle.vehicle_type;
+                const lastEntry = vehicle.last_entry ? new Date(vehicle.last_entry).toLocaleString() : 'Never';
+                const registered = new Date(vehicle.created_at).toLocaleDateString();
+
+                return `
+                    <tr>
+                        <td><span class="vehicle-number">${vehicle.vehicle_number}</span></td>
+                        <td><span class="vehicle-badge ${badgeClass}">${typeLabel}</span></td>
+                        <td>${vehicle.owner_name || '-'}</td>
+                        <td><span class="phone-number">${vehicle.phone_number || '-'}</span></td>
+                        <td><span class="email-text">${vehicle.email || '-'}</span></td>
+                        <td><strong>${vehicle.total_bookings || 0}</strong></td>
+                        <td>${lastEntry}</td>
+                        <td>${registered}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-view" onclick="viewVehicleDetails('${vehicle.id}')">View</button>
+                                <button class="btn-delete" onclick="deleteVehicle('${vehicle.id}', '${vehicle.vehicle_number}')">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterVehicles() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const typeFilter = document.getElementById('vehicleTypeFilter').value;
+
+            const filtered = allVehicles.filter(vehicle => {
+                const matchesSearch = 
+                    vehicle.vehicle_number.toLowerCase().includes(searchTerm) ||
+                    (vehicle.owner_name && vehicle.owner_name.toLowerCase().includes(searchTerm)) ||
+                    (vehicle.phone_number && vehicle.phone_number.includes(searchTerm)) ||
+                    (vehicle.email && vehicle.email.toLowerCase().includes(searchTerm));
+
+                const matchesType = !typeFilter || vehicle.vehicle_type === typeFilter;
+
+                return matchesSearch && matchesType;
+            });
+
+            displayVehicles(filtered);
+        }
+
+        function viewVehicleDetails(vehicleId) {
+            const vehicle = allVehicles.find(v => v.id == vehicleId);
+            if (vehicle) {
+                alert(`Vehicle Details:\n\n` +
+                    `Number: ${vehicle.vehicle_number}\n` +
+                    `Type: ${vehicle.vehicle_type}\n` +
+                    `Owner: ${vehicle.owner_name}\n` +
+                    `Phone: ${vehicle.phone_number}\n` +
+                    `Email: ${vehicle.email || 'N/A'}\n` +
+                    `Total Bookings: ${vehicle.total_bookings}\n` +
+                    `Registered: ${new Date(vehicle.created_at).toLocaleDateString()}`);
+            }
+        }
+
+        async function deleteVehicle(vehicleId, vehicleNumber) {
+            if (confirm(`Are you sure you want to delete vehicle ${vehicleNumber}?`)) {
+                try {
+                    // Note: You may need to add a deleteVehicle action in backend if not already present
+                    console.log('Delete functionality needs to be implemented in backend');
+                    alert('Delete functionality will be available in the next update');
+                } catch (error) {
+                    console.error('Error deleting vehicle:', error);
+                }
+            }
+        }
+
+        // Set up search and filter listeners
+        document.getElementById('searchInput').addEventListener('keyup', filterVehicles);
+        document.getElementById('vehicleTypeFilter').addEventListener('change', filterVehicles);
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            window.location.href = 'login.html';
+        }
+
+        // Load vehicles on page load
+        loadVehicles();
+    </script>
+</body>
+</html>

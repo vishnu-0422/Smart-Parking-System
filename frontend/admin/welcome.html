@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - Admin Panel</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        .welcome-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 20px;
+        }
+
+        .welcome-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 60px 40px;
+            max-width: 700px;
+            text-align: center;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .welcome-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .welcome-title {
+            font-size: 2.5em;
+            color: #1e3c72;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.2em;
+            color: #2a5298;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .welcome-message {
+            font-size: 1em;
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 40px;
+        }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .stat-mini {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-mini-label {
+            font-size: 0.85em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .stat-mini-value {
+            font-size: 2em;
+            font-weight: 700;
+        }
+
+        .admin-info {
+            background: #f8f9fa;
+            border-left: 4px solid #2a5298;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            text-align: left;
+        }
+
+        .admin-info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .admin-info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .info-value {
+            color: #666;
+        }
+
+        .admin-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .feature-box {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature-box:nth-child(2) {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .feature-box:nth-child(3) {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .feature-box:nth-child(4) {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .feature-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .feature-name {
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 12px 35px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(42, 82, 152, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #2a5298;
+            padding: 12px 35px;
+            border: 2px solid #2a5298;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-secondary:hover {
+            background: #2a5298;
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .admin-responsibilities {
+            background: #e8f4f8;
+            border-left: 4px solid #00bcd4;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        .admin-responsibilities h4 {
+            color: #00695c;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .admin-responsibilities ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #333;
+        }
+
+        .admin-responsibilities li {
+            margin-bottom: 5px;
+            font-size: 0.95em;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2a5298;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .welcome-card.redirecting {
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-container">
+        <div class="welcome-card" id="welcomeCard">
+            <div class="welcome-icon">⚙️</div>
+            <h1 class="welcome-title">Welcome, Admin!</h1>
+            <div class="welcome-subtitle" id="adminGreeting">Admin Access Granted</div>
+            
+            <div class="admin-info">
+                <div class="admin-info-item">
+                    <span class="info-label">Username:</span>
+                    <span class="info-value" id="displayUsername">Admin</span>
+                </div>
+                <div class="admin-info-item">
+                    <span class="info-label">Login Time:</span>
+                    <span class="info-value" id="displayTime">Loading...</span>
+                </div>
+                <div class="admin-info-item">
+                    <span class="info-label">Access Level:</span>
+                    <span class="info-value" style="color: #2a5298; font-weight: 600;">Full Administrator</span>
+                </div>
+            </div>
+
+            <p class="welcome-message">
+                You are now logged into the Smart Parking System Administrative Panel. 
+                Monitor parking operations, manage slots, view alerts, and analyze revenue data from this centralized dashboard.
+            </p>
+
+            <div class="admin-responsibilities">
+                <h4>📋 Your Key Responsibilities</h4>
+                <ul>
+                    <li>Monitor parking slot availability and occupancy in real-time</li>
+                    <li>Manage parking slots (activate, deactivate, maintenance)</li>
+                    <li>Review and respond to system alerts and stolen vehicle reports</li>
+                    <li>Track revenue and analyze parking statistics</li>
+                    <li>View detailed parking history and user activities</li>
+                </ul>
+            </div>
+
+            <div class="admin-stats">
+                <div class="stat-mini">
+                    <div class="stat-mini-label">System Status</div>
+                    <div class="stat-mini-value">✓ Active</div>
+                </div>
+                <div class="stat-mini">
+                    <div class="stat-mini-label">Users Online</div>
+                    <div class="stat-mini-value" id="usersOnline">-</div>
+                </div>
+                <div class="stat-mini">
+                    <div class="stat-mini-label">Parking Capacity</div>
+                    <div class="stat-mini-value" id="parkingCapacity">-</div>
+                </div>
+                <div class="stat-mini">
+                    <div class="stat-mini-label">Active Alerts</div>
+                    <div class="stat-mini-value" id="activeAlerts">-</div>
+                </div>
+            </div>
+
+            <h3 style="color: #333; margin-bottom: 20px;">Quick Access</h3>
+            <div class="admin-features">
+                <div class="feature-box">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-name">Dashboard</div>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">🅿️</div>
+                    <div class="feature-name">Manage Slots</div>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">⚠️</div>
+                    <div class="feature-name">Alerts</div>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">📝</div>
+                    <div class="feature-name">History</div>
+                </div>
+            </div>
+
+            <div class="loading-spinner" id="spinner"></div>
+
+            <div class="action-buttons">
+                <a href="dashboard.html" class="btn-primary">Go to Dashboard</a>
+                <a href="slots.html" class="btn-secondary">Manage Slots</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/main.js"></script>
+    <script>
+        // Check if admin is logged in
+        const adminToken = localStorage.getItem('adminToken');
+
+        if (!adminToken) {
+            window.location.href = 'login.html';
+        }
+
+        // Display current time
+        const now = new Date();
+        document.getElementById('displayTime').textContent = now.toLocaleString();
+
+        // Load quick stats
+        async function loadQuickStats() {
+            try {
+                console.log('Loading admin quick stats...');
+                const response = await fetch('../../backend/api/admin.php?action=dashboard', {
+                    headers: {
+                        'Authorization': 'Bearer ' + adminToken
+                    }
+                });
+
+                const result = await response.json();
+                console.log('Admin stats response:', result);
+
+                if (result.success && result.stats) {
+                    const stats = result.stats;
+                    
+                    // Update parking capacity
+                    if (stats.total_slots) {
+                        document.getElementById('parkingCapacity').textContent = stats.total_slots;
+                        console.log('Updated parkingCapacity:', stats.total_slots);
+                    }
+                    
+                    // Update active alerts
+                    if (stats.active_alerts !== undefined) {
+                        document.getElementById('activeAlerts').textContent = stats.active_alerts;
+                        console.log('Updated activeAlerts:', stats.active_alerts);
+                    }
+                    
+                    // Update users online (if available)
+                    if (stats.users_online !== undefined) {
+                        document.getElementById('usersOnline').textContent = stats.users_online;
+                    } else {
+                        document.getElementById('usersOnline').textContent = '-';
+                    }
+                } else {
+                    console.warn('Failed to load stats or invalid response structure');
+                    // Set default values
+                    document.getElementById('parkingCapacity').textContent = '-';
+                    document.getElementById('activeAlerts').textContent = '-';
+                    document.getElementById('usersOnline').textContent = '-';
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                // Set default values on error
+                document.getElementById('parkingCapacity').textContent = '-';
+                document.getElementById('activeAlerts').textContent = '-';
+                document.getElementById('usersOnline').textContent = '-';
+            }
+        }
+
+        loadQuickStats();
+
+        // Allow manual click to redirect
+        document.querySelector('.btn-primary').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = 'dashboard.html';
+        });
+    </script>
+</body>
+</html>

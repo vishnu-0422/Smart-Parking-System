@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - Smart Parking System</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        .welcome-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .welcome-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 60px 40px;
+            max-width: 600px;
+            text-align: center;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .welcome-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .welcome-title {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.2em;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .welcome-message {
+            font-size: 1em;
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 40px;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            text-align: left;
+        }
+
+        .user-info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .user-info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .info-value {
+            color: #666;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .feature-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-box:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .feature-name {
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 35px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            padding: 12px 35px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .quick-tips {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        .quick-tips h4 {
+            color: #856404;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .quick-tips ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #856404;
+        }
+
+        .quick-tips li {
+            margin-bottom: 5px;
+            font-size: 0.95em;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .welcome-card.redirecting {
+            opacity: 0.7;
+        }
+
+        .rules-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .rules-section h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .rules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .rule-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 3px solid #ffc107;
+            backdrop-filter: blur(10px);
+        }
+
+        .rule-item-title {
+            font-weight: 700;
+            margin-bottom: 5px;
+            font-size: 0.95em;
+            color: #ffc107;
+        }
+
+        .rule-item-text {
+            font-size: 0.9em;
+            line-height: 1.6;
+            opacity: 0.95;
+        }
+
+        .quotations-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quotations-section h3 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 1.4em;
+        }
+
+        .quotes-carousel {
+            display: grid;
+            gap: 15px;
+        }
+
+        .quote-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #fff;
+            backdrop-filter: blur(10px);
+            font-style: italic;
+            line-height: 1.8;
+        }
+
+        .quote-text {
+            font-size: 1.05em;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .quote-author {
+            font-size: 0.9em;
+            opacity: 0.9;
+            font-style: normal;
+        }
+
+        @media (max-width: 768px) {
+            .rules-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .rules-section,
+            .quotations-section {
+                padding: 20px;
+            }
+
+            .welcome-card {
+                padding: 40px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-container">
+        <div class="welcome-card" id="welcomeCard">
+            <div class="welcome-icon">🅿️</div>
+            <h1 class="welcome-title">Welcome Back!</h1>
+            <div class="welcome-subtitle" id="userGreeting">Hello, User!</div>
+            
+            <div class="user-info">
+                <div class="user-info-item">
+                    <span class="info-label">Name:</span>
+                    <span class="info-value" id="displayName">Loading...</span>
+                </div>
+                <div class="user-info-item">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value" id="displayEmail">Loading...</span>
+                </div>
+                <div class="user-info-item">
+                    <span class="info-label">Login Time:</span>
+                    <span class="info-value" id="displayTime">Loading...</span>
+                </div>
+            </div>
+
+            <p class="welcome-message">
+                You have successfully logged in to the Smart Parking System. 
+                Access your parking information, book slots, view history, and manage payments all in one place.
+            </p>
+
+            <div class="quick-tips">
+                <h4>✨ Quick Tips</h4>
+                <ul>
+                    <li>Book parking slots from the "Book Parking" menu</li>
+                    <li>View real-time parking availability in your dashboard</li>
+                    <li>Check your parking history and expenses</li>
+                    <li>Pay using your preferred payment method</li>
+                </ul>
+            </div>
+
+            <div class="rules-section">
+                <h3>📋 Parking Rules & Guidelines</h3>
+                <div class="rules-grid">
+                    <div class="rule-item">
+                        <div class="rule-item-title">🚭 No Smoking</div>
+                        <div class="rule-item-text">Smoking is strictly prohibited in the parking area. Please respect the no-smoking policy for the safety and comfort of all users.</div>
+                    </div>
+                    <div class="rule-item">
+                        <div class="rule-item-title">⏱️ Time Limit</div>
+                        <div class="rule-item-text">Please ensure you park only for the duration of your booking. Overstaying may result in additional charges.</div>
+                    </div>
+                    <div class="rule-item">
+                        <div class="rule-item-title">🔒 Vehicle Security</div>
+                        <div class="rule-item-text">Always lock your vehicle and take your belongings. The parking facility is not responsible for theft or damage.</div>
+                    </div>
+                    <div class="rule-item">
+                        <div class="rule-item-title">🚗 Valid Documents</div>
+                        <div class="rule-item-text">Keep your vehicle registration and documents handy. Our staff may verify your vehicle information.</div>
+                    </div>
+                    <div class="rule-item">
+                        <div class="rule-item-title">🔇 Keep Noise Low</div>
+                        <div class="rule-item-text">Please avoid honking and loud music. Maintain a peaceful environment for all parking users.</div>
+                    </div>
+                    <div class="rule-item">
+                        <div class="rule-item-title">♿ Reserved Spots</div>
+                        <div class="rule-item-text">Do not park in reserved slots (disabled, EV charging). These are reserved for specific vehicles only.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quotations-section">
+                <h3>💡 Inspirational Quotes</h3>
+                <div class="quotes-carousel">
+                    <div class="quote-item">
+                        <div class="quote-text">"Safety doesn't happen by accident. It is a choice we all make."</div>
+                        <div class="quote-author">— Safety First Initiative</div>
+                    </div>
+                    <div class="quote-item">
+                        <div class="quote-text">"A smooth ride begins with responsible parking. Thank you for being a considerate driver."</div>
+                        <div class="quote-author">— Smart Parking Community</div>
+                    </div>
+                    <div class="quote-item">
+                        <div class="quote-text">"Your parking discipline today ensures a better system tomorrow."</div>
+                        <div class="quote-author">— Parking Excellence</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-box">
+                    <div class="feature-icon">📍</div>
+                    <div class="feature-name">Book Parking</div>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-name">Dashboard</div>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">💳</div>
+                    <div class="feature-name">Payment</div>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">📝</div>
+                    <div class="feature-name">History</div>
+                </div>
+            </div>
+
+            <div class="loading-spinner" id="spinner"></div>
+
+            <div class="action-buttons">
+                <a href="user_dashboard.html" class="btn-primary">Go to Dashboard</a>
+                <a href="entry.html" class="btn-secondary">Book Parking</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/main.js"></script>
+    <script>
+        // Check if user is logged in
+        const userId = localStorage.getItem('userId');
+        const userName = localStorage.getItem('userName');
+        const userEmail = localStorage.getItem('userEmail');
+
+        if (!userId) {
+            window.location.href = 'login.html';
+        }
+
+        // Display user information
+        document.getElementById('userGreeting').textContent = `Hello, ${userName}!`;
+        document.getElementById('displayName').textContent = userName || 'User';
+        document.getElementById('displayEmail').textContent = userEmail || 'user@example.com';
+
+        // Display current time
+        const now = new Date();
+        document.getElementById('displayTime').textContent = now.toLocaleString();
+
+        // Allow manual click to redirect
+        document.querySelector('.btn-primary').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = 'user_dashboard.html';
+        });
+    </script>
+</body>
+</html>

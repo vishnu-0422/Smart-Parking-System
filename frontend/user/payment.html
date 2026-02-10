@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - Smart Parking System</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Smart Parking System</h1>
+            <nav>
+                <a href="entry.html">Entry</a>
+                <a href="slot.html">Select Slot</a>
+                <a href="exit.html">Exit</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="card">
+                <h2 id="pageTitle">Payment</h2>
+                
+                <div id="bookingInfo" class="info-box"></div>
+
+                <div class="payment-summary">
+                    <h3>Payment Summary</h3>
+                    <div class="summary-item">
+                        <span>Parking Duration:</span>
+                        <span id="duration">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Rate per hour:</span>
+                        <span id="rate">-</span>
+                    </div>
+                    <div class="summary-item total">
+                        <span>Total Amount:</span>
+                        <span id="totalAmount">₹0.00</span>
+                    </div>
+                </div>
+
+                <form id="paymentForm">
+                    <h3>Payment Method</h3>
+                    <div class="form-group">
+                        <label>
+                            <input type="radio" name="paymentMethod" value="cash" checked>
+                            💵 Cash (Pay at Exit)
+                        </label>
+                        <label>
+                            <input type="radio" name="paymentMethod" value="card">
+                            💳 Credit/Debit Card
+                        </label>
+                        <label>
+                            <input type="radio" name="paymentMethod" value="mobile">
+                            📱 Mobile Payment (UPI/PayPal)
+                        </label>
+                    </div>
+
+                    <div id="cardDetails" style="display: none;">
+                        <h4 style="color: #667eea; margin-bottom: 15px;">Enter Card Details</h4>
+                        <div class="form-group">
+                            <label for="cardNumber">Card Number *</label>
+                            <input type="text" id="cardNumber" name="cardNumber" 
+                                   placeholder="1234 5678 9012 3456" maxlength="19">
+                        </div>
+                        <div class="form-group">
+                            <label for="cardName">Cardholder Name *</label>
+                            <input type="text" id="cardName" name="cardName" 
+                                   placeholder="John Doe">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="expiryDate">Expiry Date *</label>
+                                <input type="text" id="expiryDate" name="expiryDate" 
+                                       placeholder="MM/YY" maxlength="5">
+                            </div>
+                            <div class="form-group">
+                                <label for="cvv">CVV *</label>
+                                <input type="text" id="cvv" name="cvv" 
+                                       placeholder="123" maxlength="3">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="mobilePaymentDetails" style="display: none;">
+                        <h4 style="color: #667eea; margin-bottom: 15px;">Mobile Payment Details</h4>
+                        <div class="form-group">
+                            <label for="mobileNumber">Mobile Number *</label>
+                            <input type="tel" id="mobileNumber" name="mobileNumber" 
+                                   placeholder="10 digit mobile number" maxlength="10">
+                        </div>
+                        <div class="form-group">
+                            <label for="mobileProvider">Payment Provider *</label>
+                            <select id="mobileProvider" name="mobileProvider">
+                                <option value="">Select Provider</option>
+                                <option value="upi">📲 UPI (Google Pay, PhonePe, Paytm)</option>
+                                <option value="paypal">🅿️ PayPal</option>
+                                <option value="stripe">🎯 Stripe</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="submitPaymentBtn" style="width: 100%; padding: 14px; margin-top: 20px;">Process Payment</button>
+                </form>
+
+                <div id="message" class="message"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../assets/js/main.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const vehicleId = urlParams.get('vehicleId');
+        const slotId = urlParams.get('slotId');
+        const paymentType = urlParams.get('type') || 'booking';
+        const bookingId = urlParams.get('bookingId');
+        const extensionHours = urlParams.get('hours');
+        const extensionAmount = urlParams.get('amount');
+        const vehicleNumber = urlParams.get('vehicleNumber');
+
+        let bookingData = {
+            vehicleId: vehicleId || '',
+            slotId: slotId || '',
+            bookingId: bookingId || '',
+            type: paymentType,
+            hours: extensionHours || '',
+            amount: extensionAmount || ''
+        };
+
+        console.log('Payment page loaded with:', {
+            paymentType,
+            bookingId,
+            extensionHours,
+            extensionAmount,
+            vehicleNumber,
+            bookingData
+        });
+
+        // Show/hide card details based on payment method
+        document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.getElementById('cardDetails').style.display = 
+                    this.value === 'card' ? 'block' : 'none';
+                document.getElementById('mobilePaymentDetails').style.display = 
+                    this.value === 'mobile' ? 'block' : 'none';
+                
+                // Clear validation message on method change
+                document.getElementById('message').innerHTML = '';
+            });
+        });
+
+        // Load booking information based on type
+        async function loadBookingInfo() {
+            try {
+                // Update page title based on payment type
+                if (paymentType === 'extension') {
+                    document.getElementById('pageTitle').textContent = '💳 Parking Extension Payment';
+                }
+
+                if (paymentType === 'extension') {
+                    // For extension, display the extension details directly
+                    document.getElementById('bookingInfo').innerHTML = `
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                            <p style="margin: 0 0 10px 0;"><strong style="color: #667eea;">Booking ID:</strong> <span style="font-family: monospace; font-weight: 600; color: #333;">${bookingId}</span></p>
+                        </div>
+                        <p style="margin: 10px 0;"><strong>Vehicle:</strong> ${vehicleNumber}</p>
+                        <p style="margin: 10px 0;"><strong>Extension Hours:</strong> ${extensionHours} hours</p>
+                    `;
+                    document.getElementById('duration').textContent = extensionHours + ' hours';
+                    document.getElementById('rate').textContent = '₹' + (extensionAmount / extensionHours).toFixed(2) + '/hr';
+                    document.getElementById('totalAmount').textContent = '₹' + parseFloat(extensionAmount).toFixed(2);
+                    
+                    bookingData.bookingId = bookingId;
+                    bookingData.hours = extensionHours;
+                    bookingData.amount = extensionAmount;
+                } else if (!vehicleId || !slotId) {
+                    window.location.href = 'entry.html';
+                    return;
+                } else {
+                    // For regular booking payment
+                    const response = await fetch(`../../backend/api/payment.php?action=getBooking&vehicleId=${vehicleId}&slotId=${slotId}`);
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Format entry time with proper date and time display
+                        const entryDate = new Date(result.booking.entry_time);
+                        const formattedEntryTime = entryDate.toLocaleString('en-IN', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: true
+                        });
+                        
+                        document.getElementById('bookingInfo').innerHTML = `
+                            <p><strong>Vehicle:</strong> ${result.booking.vehicle_number}</p>
+                            <p><strong>Slot:</strong> ${result.booking.slot_number}</p>
+                            <p><strong>Entry Time:</strong> ${formattedEntryTime}</p>
+                        `;
+                        document.getElementById('duration').textContent = result.booking.duration || '1 hour';
+                        document.getElementById('rate').textContent = '₹' + result.booking.rate_per_hour + '/hr';
+                        document.getElementById('totalAmount').textContent = '₹' + result.booking.total_amount;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading booking info:', error);
+            }
+        }
+
+        // Handle payment form submission
+        document.getElementById('paymentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            let validationError = '';
+
+            // Validate based on payment method
+            if (paymentMethod === 'card') {
+                const cardNumber = document.getElementById('cardNumber').value.trim();
+                const cardName = document.getElementById('cardName').value.trim();
+                const expiryDate = document.getElementById('expiryDate').value.trim();
+                const cvv = document.getElementById('cvv').value.trim();
+
+                if (!cardNumber || !cardName || !expiryDate || !cvv) {
+                    validationError = 'Please fill all card details (Card Number, Name, Expiry, CVV)';
+                }
+            } else if (paymentMethod === 'mobile') {
+                const mobileNumber = document.getElementById('mobileNumber').value.trim();
+                const mobileProvider = document.getElementById('mobileProvider').value;
+
+                if (!mobileNumber || !mobileProvider) {
+                    validationError = 'Please enter mobile number and select payment provider';
+                }
+            }
+
+            if (validationError) {
+                document.getElementById('message').innerHTML = 
+                    '<div class="error">❌ ' + validationError + '</div>';
+                return;
+            }
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            // Merge booking data with form data
+            const paymentData = {
+                ...bookingData,
+                ...data,
+                paymentMethod: paymentMethod
+            };
+
+            // For extension payments, ensure all required fields are included
+            if (paymentType === 'extension') {
+                if (!paymentData.bookingId) {
+                    document.getElementById('message').innerHTML = 
+                        '<div class="error">❌ Booking ID is missing. Please try again.</div>';
+                    return;
+                }
+                if (!paymentData.hours) {
+                    document.getElementById('message').innerHTML = 
+                        '<div class="error">❌ Extension hours missing. Please try again.</div>';
+                    return;
+                }
+                if (!paymentData.amount) {
+                    document.getElementById('message').innerHTML = 
+                        '<div class="error">❌ Payment amount missing. Please try again.</div>';
+                    return;
+                }
+            }
+
+            try {
+                const response = await fetch('../../backend/api/payment.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(paymentData)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    let redirectUrl = `qr.html?bookingId=${result.bookingId}`;
+                    if (paymentType === 'extension') {
+                        redirectUrl = `user_dashboard.html?message=Extension payment successful`;
+                    }
+                    
+                    document.getElementById('message').innerHTML = 
+                        '<div class="success">✓ Payment processed successfully!</div>';
+                    setTimeout(() => {
+                        window.location.href = redirectUrl;
+                    }, 1500);
+                } else {
+                    document.getElementById('message').innerHTML = 
+                        '<div class="error">❌ ' + (result.message || 'Payment failed. Please try again.') + '</div>';
+                }
+            } catch (error) {
+                document.getElementById('message').innerHTML = 
+                    '<div class="error">❌ An error occurred. Please try again.</div>';
+                console.error('Error:', error);
+            }
+        });
+
+        loadBookingInfo();
+    </script>
+</body>
+</html>
+
+
+
+

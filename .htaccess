@@ -1,0 +1,30 @@
+# Smart Parking System - Apache Configuration
+
+# Enable rewrite engine
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    
+    # Allow access to HTML files
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    
+    # Redirect root to index.php
+    RewriteRule ^$ index.php [L]
+</IfModule>
+
+# Allow access to all files
+<FilesMatch "\.(html|css|js|png|jpg|jpeg|gif|ico|svg)$">
+    Order allow,deny
+    Allow from all
+</FilesMatch>
+
+# PHP settings
+<IfModule mod_php.c>
+    php_flag display_errors On
+    php_value error_reporting E_ALL
+</IfModule>
+
+
+
+

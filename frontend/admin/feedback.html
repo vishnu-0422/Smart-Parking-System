@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Management - Smart Parking System</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Smart Parking System - Admin Dashboard</h1>
+            <nav>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="slots.html">Slots</a>
+                <a href="vehicles.html">Vehicles</a>
+                <a href="alerts.html">Alerts</a>
+                <a href="feedback.html" class="active">Feedback</a>
+                <a href="#" onclick="logout()">Logout</a>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Feedback Statistics -->
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <h3>Total Feedback</h3>
+                    <div class="stat-value" id="totalFeedback">-</div>
+                    <div class="stat-label">New: <span id="newFeedback">-</span></div>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Average Rating</h3>
+                    <div class="stat-value" id="avgRating">-</div>
+                    <div class="stat-label">Out of 5 stars</div>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Most Requested Improvements</h3>
+                    <div class="stat-value" id="topImprovement">-</div>
+                    <div class="stat-label">Based on feedback</div>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Response Rate</h3>
+                    <div class="stat-value" id="responseRate">-</div>
+                    <div class="stat-label">Feedback addressed</div>
+                </div>
+            </div>
+
+            <!-- Feedback List -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>User Feedback</h2>
+                    <div class="card-actions">
+                        <button id="refreshBtn" class="btn-primary">Refresh</button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table id="feedbackTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Vehicle</th>
+                                <th>Rating</th>
+                                <th>Feedback</th>
+                                <th>Improvements</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="feedbackTableBody">
+                            <tr>
+                                <td colspan="9" class="loading">Loading feedback...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Feedback Detail Modal -->
+    <div id="feedbackModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Feedback Details</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="feedbackDetail">
+                <!-- Feedback details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/main.js"></script>
+    <script>
+        // Check authentication
+        if (!localStorage.getItem('adminToken')) {
+            window.location.href = 'login.html';
+        }
+
+        // Load feedback data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFeedbackStats();
+            loadFeedback();
+        });
+
+        // Refresh button
+        document.getElementById('refreshBtn').addEventListener('click', function() {
+            loadFeedbackStats();
+            loadFeedback();
+        });
+
+        // Load feedback statistics
+        async function loadFeedbackStats() {
+            try {
+                const token = localStorage.getItem('adminToken');
+                const response = await fetch('../../backend/api/feedback.php?action=getFeedbackStats', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const result = await response.json();
+
+                if (result.success) {
+
+                if (result.success) {
+
+                if (result.success) {
+                    document.getElementById('totalFeedback').textContent = result.stats.total_feedback;
+                    document.getElementById('avgRating').textContent = result.stats.average_rating;
+                    document.getElementById('newFeedback').textContent = result.stats.total_feedback; // Assuming all are new for now
+
+                    // Top improvement
+                    if (result.stats.top_improvements && result.stats.top_improvements.length > 0) {
+                        document.getElementById('topImprovement').textContent = Object.keys(result.stats.top_improvements)[0];
+                    }
+
+                    // Response rate (placeholder)
+                    document.getElementById('responseRate').textContent = '0%';
+                } else {
+                    console.error('Failed to load feedback stats:', result.message);
+                }
+            } catch (error) {
+                console.error('Error loading feedback stats:', error);
+            }
+        }
+
+        // Load feedback list
+        async function loadFeedback() {
+            try {
+                const token = localStorage.getItem('adminToken');
+                const response = await fetch('../../backend/api/feedback.php?action=getFeedback', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const result = await response.json();
+
+                const tbody = document.getElementById('feedbackTableBody');
+
+                if (result.success && result.feedback.length > 0) {
+                    tbody.innerHTML = result.feedback.map(feedback => `
+                        <tr>
+                            <td>${feedback.id}</td>
+                            <td>${feedback.user_name || 'Anonymous'}<br><small>${feedback.user_email || ''}</small></td>
+                            <td>${feedback.vehicle_number}</td>
+                            <td>
+                                <div class="rating-display">
+                                    ${'★'.repeat(feedback.rating)}${'☆'.repeat(5-feedback.rating)}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="feedback-text">${feedback.feedback_text || 'No comments'}</div>
+                            </td>
+                            <td>
+                                ${feedback.improvements ? JSON.parse(feedback.improvements).join(', ') : 'None'}
+                            </td>
+                            <td>${new Date(feedback.created_at).toLocaleDateString()}</td>
+                            <td>
+                                <span class="status-${feedback.status}">${feedback.status}</span>
+                            </td>
+                            <td>
+                                <button onclick="viewFeedback(${feedback.id})" class="btn-small">View</button>
+                                <button onclick="updateStatus(${feedback.id}, 'reviewed')" class="btn-small">Mark Reviewed</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="9">No feedback found</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading feedback:', error);
+                document.getElementById('feedbackTableBody').innerHTML =
+                    '<tr><td colspan="9" class="error">Error loading feedback</td></tr>';
+            }
+        }
+
+        // View feedback details
+        function viewFeedback(id) {
+            // For now, just show an alert. Could be expanded to show modal
+            alert('View feedback details for ID: ' + id);
+        }
+
+        // Update feedback status
+        async function updateStatus(id, status) {
+            // This would require a new API endpoint to update status
+            alert('Status update functionality to be implemented');
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('adminToken');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

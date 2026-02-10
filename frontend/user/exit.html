@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Exit - Smart Parking System</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        .feedback-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-top: 25px;
+            display: none;
+        }
+
+        .feedback-section.show {
+            display: block;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feedback-section h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feedback-form {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 25px;
+            border-radius: 8px;
+        }
+
+        .form-group-feedback {
+            margin-bottom: 20px;
+        }
+
+        .form-group-feedback label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .rating-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .rating-btn {
+            width: 45px;
+            height: 45px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.3em;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .rating-btn:hover {
+            transform: scale(1.1);
+            border-color: #667eea;
+        }
+
+        .rating-btn.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: scale(1.15);
+        }
+
+        .textarea-feedback {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 0.95em;
+            resize: vertical;
+            min-height: 100px;
+            transition: border-color 0.3s ease;
+        }
+
+        .textarea-feedback:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            margin: 0;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .btn-submit-feedback {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit-feedback:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-skip-feedback {
+            background: white;
+            color: #667eea;
+            padding: 12px 30px;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-skip-feedback:hover {
+            background: #f0f0f0;
+        }
+
+        .feedback-success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .feedback-success.show {
+            display: block;
+        }
+
+        .char-count {
+            font-size: 0.85em;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .feedback-section {
+                padding: 20px;
+            }
+
+            .feedback-form {
+                padding: 15px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn-submit-feedback,
+            .btn-skip-feedback {
+                width: 100%;
+            }
+
+            .rating-group {
+                justify-content: space-around;
+            }
+
+            .rating-btn {
+                width: 50px;
+                height: 50px;
+            }
+        }
+    </style>
+<body>
+    <div class="container">
+        <header>
+            <h1>Smart Parking System</h1>
+            <nav>
+                <a href="entry.html">Entry</a>
+                <a href="slot.html">Select Slot</a>
+                <a href="exit.html" class="active">Exit</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="card">
+                <h2>Vehicle Exit</h2>
+                
+                <div class="exit-options">
+                    <div class="option-card">
+                        <h3>Scan QR Code</h3>
+                        <p>Scan your parking ticket QR code</p>
+                        <button onclick="scanQR()" class="btn btn-primary">Scan QR Code</button>
+                    </div>
+                    
+                    <div class="option-card">
+                        <h3>Enter Vehicle Number</h3>
+                        <p>Enter your vehicle number to exit</p>
+                        <form id="exitForm">
+                            <div class="form-group">
+                                <input type="text" id="vehicleNumber" name="vehicleNumber" 
+                                       placeholder="Enter vehicle number" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Process Exit</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="exitSummary" class="exit-summary" style="display: none;">
+                    <h3>Exit Summary</h3>
+                    <div id="summaryContent"></div>
+                    <button id="confirmExitBtn" class="btn btn-success">Confirm Exit</button>
+                </div>
+
+                <div id="feedbackSection" class="feedback-section">
+                    <h3>💬 Help Us Improve</h3>
+                    <div class="feedback-form">
+                        <div class="form-group-feedback">
+                            <label>How would you rate your parking experience?</label>
+                            <div class="rating-group" id="ratingGroup">
+                                <button class="rating-btn" data-rating="1" title="Poor">😞</button>
+                                <button class="rating-btn" data-rating="2" title="Fair">😐</button>
+                                <button class="rating-btn" data-rating="3" title="Good">🙂</button>
+                                <button class="rating-btn" data-rating="4" title="Very Good">😊</button>
+                                <button class="rating-btn" data-rating="5" title="Excellent">😍</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group-feedback">
+                            <label>What can we improve? (Select all that apply)</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="improve_cleanliness" value="Cleanliness & Maintenance">
+                                    <label for="improve_cleanliness">Cleanliness & Maintenance</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="improve_security" value="Security & Safety">
+                                    <label for="improve_security">Security & Safety</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="improve_availability" value="Slot Availability">
+                                    <label for="improve_availability">Slot Availability</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="improve_pricing" value="Pricing">
+                                    <label for="improve_pricing">Pricing</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="improve_navigation" value="Navigation & Signage">
+                                    <label for="improve_navigation">Navigation & Signage</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="improve_facilities" value="Facilities & Amenities">
+                                    <label for="improve_facilities">Facilities & Amenities</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="improve_app" value="Mobile App/Website">
+                                    <label for="improve_app">Mobile App/Website</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="improve_support" value="Customer Support">
+                                    <label for="improve_support">Customer Support</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group-feedback">
+                            <label for="feedbackText">Additional Comments & Suggestions</label>
+                            <textarea id="feedbackText" class="textarea-feedback" 
+                                    placeholder="Please share any suggestions or feedback that would help us improve our parking system..."></textarea>
+                            <div class="char-count"><span id="charCount">0</span>/500 characters</div>
+                        </div>
+
+                        <div class="button-group">
+                            <button id="skipFeedbackBtn" class="btn-skip-feedback">Skip for Now</button>
+                            <button id="submitFeedbackBtn" class="btn-submit-feedback">Submit Feedback</button>
+                        </div>
+
+                        <div id="feedbackSuccess" class="feedback-success">
+                            ✓ Thank you for your feedback! We appreciate your suggestions and will work to improve our service.
+                        </div>
+                    </div>
+                </div>
+
+                <div id="message" class="message"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../assets/js/main.js"></script>
+    <script>
+        function scanQR() {
+            // QR scanner implementation would go here
+            // For now, prompt for QR code data
+            const qrData = prompt('Enter QR code data or scan QR code:');
+            if (qrData) {
+                try {
+                    const data = JSON.parse(qrData);
+                    processExit(data.bookingId || null, data.vehicleNumber);
+                } catch (e) {
+                    alert('Invalid QR code format');
+                }
+            }
+        }
+
+        // Handle exit form submission
+        document.getElementById('exitForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const vehicleNumber = document.getElementById('vehicleNumber').value;
+            processExit(null, vehicleNumber);
+        });
+
+        async function processExit(bookingId, vehicleNumber) {
+            try {
+                const response = await fetch('../../backend/api/exit.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        bookingId: bookingId,
+                        vehicleNumber: vehicleNumber
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Format dates properly
+                    const entryDate = new Date(result.exit.entry_time);
+                    const exitDate = new Date(result.exit.exit_time);
+                    
+                    const formattedEntryTime = entryDate.toLocaleString('en-IN', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                    });
+                    
+                    const formattedExitTime = exitDate.toLocaleString('en-IN', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                    });
+                    
+                    document.getElementById('summaryContent').innerHTML = `
+                        <div class="summary-item">
+                            <span>Vehicle Number:</span>
+                            <span>${result.exit.vehicle_number}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Slot Number:</span>
+                            <span>${result.exit.slot_number}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Entry Time:</span>
+                            <span>${formattedEntryTime}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Exit Time:</span>
+                            <span>${formattedExitTime}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Total Duration:</span>
+                            <span>${result.exit.duration}</span>
+                        </div>
+                        <div class="summary-item total">
+                            <span>Total Amount:</span>
+                            <span>₹${result.exit.total_amount}</span>
+                        </div>
+                        ${result.exit.additional_charges > 0 ? `
+                            <div class="summary-item">
+                                <span>Additional Charges:</span>
+                                <span>₹${result.exit.additional_charges}</span>
+                            </div>
+                        ` : ''}
+                    `;
+                    document.getElementById('exitSummary').style.display = 'block';
+                    
+                    // Store exit data for confirmation
+                    window.exitData = result.exit;
+                } else {
+                    document.getElementById('message').innerHTML = 
+                        '<div class="error">' + result.message + '</div>';
+                }
+            } catch (error) {
+                document.getElementById('message').innerHTML = 
+                    '<div class="error">An error occurred. Please try again.</div>';
+                console.error('Error:', error);
+            }
+        }
+
+        // Confirm exit
+        document.getElementById('confirmExitBtn').addEventListener('click', async function() {
+            if (!window.exitData) return;
+
+            try {
+                const response = await fetch('../../backend/api/exit.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'confirm',
+                        bookingId: window.exitData.booking_id
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Hide exit summary and show feedback section
+                    document.getElementById('exitSummary').style.display = 'none';
+                    document.getElementById('feedbackSection').classList.add('show');
+                } else {
+                    document.getElementById('message').innerHTML = 
+                        '<div class="error">' + result.message + '</div>';
+                }
+            } catch (error) {
+                document.getElementById('message').innerHTML = 
+                    '<div class="error">An error occurred. Please try again.</div>';
+                console.error('Error:', error);
+            }
+        });
+
+        // Rating buttons functionality
+        let selectedRating = 0;
+        document.querySelectorAll('.rating-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedRating = this.dataset.rating;
+            });
+        });
+
+        // Character count for feedback textarea
+        document.getElementById('feedbackText').addEventListener('input', function() {
+            document.getElementById('charCount').textContent = this.value.length;
+        });
+
+        // Submit feedback
+        document.getElementById('submitFeedbackBtn').addEventListener('click', async function() {
+            const rating = selectedRating;
+            const improvements = Array.from(document.querySelectorAll('.checkbox-item input[type="checkbox"]:checked'))
+                .map(cb => cb.value);
+            const feedback = document.getElementById('feedbackText').value;
+
+            if (!rating) {
+                alert('Please select a rating to proceed');
+                return;
+            }
+
+            try {
+                const response = await fetch('../../backend/api/feedback.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: localStorage.getItem('userId'),
+                        vehicleNumber: window.exitData ? window.exitData.vehicle_number : '',
+                        bookingId: window.exitData ? window.exitData.booking_id : '',
+                        rating: rating,
+                        improvements: improvements,
+                        feedback: feedback,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('feedbackSuccess').classList.add('show');
+                    document.querySelector('.feedback-form').style.display = 'none';
+                    
+                    setTimeout(() => {
+                        document.getElementById('message').innerHTML = 
+                            '<div class="success">Exit processed successfully! Thank you for using Smart Parking System and for your valuable feedback.</div>';
+                        setTimeout(() => {
+                            window.location.href = 'user_dashboard.html';
+                        }, 3000);
+                    }, 1500);
+                } else {
+                    alert('Error submitting feedback: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error submitting feedback. Please try again.');
+            }
+        });
+
+        // Skip feedback
+        document.getElementById('skipFeedbackBtn').addEventListener('click', function() {
+            document.getElementById('message').innerHTML = 
+                '<div class="success">Exit processed successfully! Thank you for using Smart Parking System.</div>';
+            setTimeout(() => {
+                window.location.href = 'user_dashboard.html';
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
+
+
+
+

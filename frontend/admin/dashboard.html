@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Smart Parking System</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Smart Parking System - Admin Dashboard</h1>
+            <nav>
+                <a href="dashboard.html" class="active">Dashboard</a>
+                <a href="slots.html">Slots</a>
+                <a href="vehicles.html">Vehicles</a>
+                <a href="alerts.html">Alerts</a>
+                <a href="feedback.html">Feedback</a>
+                <a href="#" onclick="logout()">Logout</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <h3>Total Slots</h3>
+                    <div class="stat-value" id="totalSlots">-</div>
+                    <div class="stat-label">Available: <span id="availableSlots">-</span></div>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Occupied Slots</h3>
+                    <div class="stat-value" id="occupiedSlots">-</div>
+                    <div class="stat-label">Percentage: <span id="occupancyRate">-</span>%</div>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Revenue</h3>
+                    <div class="stat-value" id="todayRevenue">₹0.00</div>
+                    <div class="stat-label">
+                        Today Transactions: <span id="todayTransactions">-</span><br>
+                        Total Revenue: <span id="totalRevenue">₹0.00</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Active Alerts</h3>
+                    <div class="stat-value" id="activeAlerts">-</div>
+                    <div class="stat-label">Stolen Vehicles: <span id="stolenVehicles">-</span></div>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Parking Area Occupied</h3>
+                    <div class="stat-value" id="vehiclesInClosed">-</div>
+                    <div class="stat-label">Open: <span id="vehiclesInOpen">-</span></div>
+                </div>
+            </div>
+
+            <div class="dashboard-section">
+                <h2>Recent Activities</h2>
+                <div class="table-container">
+                    <table id="recentActivities">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Vehicle</th>
+                                <th>Slot</th>
+                                <th>Action</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Activities will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="dashboard-section">
+                <h2>Quick Actions</h2>
+                <div class="action-buttons">
+                    <a href="slots.html" class="btn btn-primary">Manage Slots</a>
+                    <a href="alerts.html" class="btn btn-warning">View Alerts</a>
+                    <a href="history.html" class="btn btn-secondary">View Parking History</a>
+                    <button onclick="refreshDashboard()" class="btn btn-secondary">Refresh</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../assets/js/main.js"></script>
+    <script>
+        // Check authentication
+        if (!localStorage.getItem('adminToken')) {
+            window.location.href = 'login.html';
+        }
+
+        async function loadDashboard() {
+            try {
+                const response = await fetch('../../backend/api/admin.php?action=dashboard', {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('adminToken')
+                    }
+                });
+
+                const result = await response.json();
+                
+                    if (result.success) {
+                    const stats = result.stats;
+                    document.getElementById('totalSlots').textContent = stats.total_slots || 0;
+                    document.getElementById('availableSlots').textContent = stats.available_slots || 0;
+                    document.getElementById('occupiedSlots').textContent = stats.occupied_slots || 0;
+                    document.getElementById('occupancyRate').textContent = stats.occupancy_rate || 0;
+                    document.getElementById('todayRevenue').textContent = '₹' + (stats.today_revenue || 0).toFixed(2);
+                    document.getElementById('todayTransactions').textContent = stats.today_transactions || 0;
+                    document.getElementById('totalRevenue').textContent = '₹' + (stats.total_revenue || 0).toFixed(2);
+                    document.getElementById('activeAlerts').textContent = stats.active_alerts || 0;
+                    document.getElementById('stolenVehicles').textContent = stats.stolen_vehicles || 0;
+                        document.getElementById('vehiclesInOpen').textContent = stats.vehicles_in_open || 0;
+                        document.getElementById('vehiclesInClosed').textContent = stats.vehicles_in_closed || 0;
+
+                    // Load recent activities
+                    const activitiesTable = document.querySelector('#recentActivities tbody');
+                    activitiesTable.innerHTML = '';
+                    
+                    if (result.activities && result.activities.length > 0) {
+                        result.activities.forEach(activity => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${new Date(activity.timestamp).toLocaleString()}</td>
+                                <td>${activity.vehicle_number}</td>
+                                <td>${activity.slot_number || '-'}</td>
+                                <td>${activity.action}</td>
+                                <td>${activity.amount ? '₹' + activity.amount.toFixed(2) : '-'}</td>
+                            `;
+                            activitiesTable.appendChild(row);
+                        });
+                    } else {
+                        activitiesTable.innerHTML = '<tr><td colspan="5">No recent activities</td></tr>';
+                    }
+                } else {
+                    if (result.message === 'Unauthorized') {
+                        window.location.href = 'login.html';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        function refreshDashboard() {
+            loadDashboard();
+        }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            window.location.href = 'login.html';
+        }
+
+        // Load dashboard on page load
+        loadDashboard();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(loadDashboard, 30000);
+    </script>
+</body>
+</html>
+
+
+
+

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Login - Smart Parking System</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .parking-icon {
+            position: absolute;
+            opacity: 0.1;
+            font-size: 100px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .parking-icon:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
+        .parking-icon:nth-child(2) { top: 60%; right: 10%; animation-delay: 2s; }
+        .parking-icon:nth-child(3) { bottom: 15%; left: 15%; animation-delay: 4s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            z-index: 1;
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 50px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.8s ease-out;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .parking-logo {
+            font-size: 50px;
+            margin-bottom: 15px;
+            animation: parkingPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes parkingPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .login-card h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .login-card h2 {
+            color: #764ba2;
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .tab-switch {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: #f0f4ff;
+            padding: 5px;
+            border-radius: 10px;
+        }
+
+        .tab-switch button {
+            flex: 1;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s;
+            color: #64748b;
+        }
+
+        .tab-switch button.btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #334155;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: #f8f9ff;
+        }
+
+        .form-group input::placeholder {
+            color: #cbd5e1;
+        }
+
+        .btn-block {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-primary.btn-block {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary.btn-block:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary.btn-block:active {
+            transform: translateY(0);
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .login-footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .login-footer a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .features {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .feature {
+            flex: 1;
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .feature-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 480px) {
+            .login-card { padding: 30px 20px; }
+            .login-card h1 { font-size: 24px; }
+            .parking-logo { font-size: 40px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-background">
+        <div class="parking-icon">🅿️</div>
+        <div class="parking-icon">🚗</div>
+        <div class="parking-icon">🚙</div>
+    </div>
+
+    <div class="container">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="parking-logo">🅿️</div>
+                    <h1>Smart Parking</h1>
+                    <h2>System</h2>
+                    <p class="subtitle">Find & Park with Ease</p>
+                </div>
+
+                <div class="tab-switch">
+                    <button id="loginTab" class="btn btn-small btn-primary">Login</button>
+                    <button id="registerTab" class="btn btn-small btn-secondary">Sign Up</button>
+                </div>
+
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">📧 Email Address</label>
+                        <input type="email" id="loginEmail" name="email" required placeholder="your@email.com" autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">🔐 Password</label>
+                        <input type="password" id="loginPassword" name="password" required placeholder="Enter your password" autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Login to Dashboard</button>
+                </form>
+
+                <form id="registerForm" style="display: none;">
+                    <div class="form-group">
+                        <label for="registerName">👤 Full Name</label>
+                        <input type="text" id="registerName" name="name" required placeholder="Your full name">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerEmail">📧 Email Address</label>
+                        <input type="email" id="registerEmail" name="email" required placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPhone">📱 Phone Number</label>
+                        <input type="tel" id="registerPhone" name="phone" placeholder="10-digit phone number">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">🔐 Password</label>
+                        <input type="password" id="registerPassword" name="password" required placeholder="Create a strong password">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+                </form>
+
+                <div id="message" class="message"></div>
+
+                <div class="login-footer">
+                    <a href="entry.html">← Back to Parking</a>
+                </div>
+
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">⚡</div>
+                        <div>Quick Booking</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">💳</div>
+                        <div>Easy Payment</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">📍</div>
+                        <div>Real-time Status</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/main.js"></script>
+    <script>
+        const loginTab = document.getElementById('loginTab');
+        const registerTab = document.getElementById('registerTab');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const messageDiv = document.getElementById('message');
+
+        loginTab.addEventListener('click', function() {
+            loginForm.style.display = 'block';
+            registerForm.style.display = 'none';
+            loginTab.classList.add('btn-primary');
+            loginTab.classList.remove('btn-secondary');
+            registerTab.classList.add('btn-secondary');
+            registerTab.classList.remove('btn-primary');
+            messageDiv.style.display = 'none';
+        });
+
+        registerTab.addEventListener('click', function() {
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'block';
+            registerTab.classList.add('btn-primary');
+            registerTab.classList.remove('btn-secondary');
+            loginTab.classList.add('btn-secondary');
+            loginTab.classList.remove('btn-primary');
+            messageDiv.style.display = 'none';
+        });
+
+        function showMessage(text, type) {
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+        }
+
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(loginForm);
+            const data = Object.fromEntries(formData);
+            data.action = 'login';
+
+            try {
+                const response = await fetch('../../backend/api/user.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    localStorage.setItem('userToken', result.token || '');
+                    localStorage.setItem('userId', result.user.id);
+                    localStorage.setItem('userName', result.user.name);
+                    localStorage.setItem('userEmail', result.user.email);
+                    showMessage('✓ Login successful! Redirecting...', 'success');
+                    setTimeout(() => { window.location.href = 'welcome.html'; }, 1200);
+                } else {
+                    showMessage('✗ ' + (result.message || 'Login failed'), 'error');
+                }
+            } catch (error) {
+                showMessage('✗ An error occurred. Please try again.', 'error');
+                console.error('Login error:', error);
+            }
+        });
+
+        registerForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(registerForm);
+            const data = Object.fromEntries(formData);
+            data.action = 'register';
+
+            try {
+                const response = await fetch('../../backend/api/user.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    showMessage('✓ Account created! Switching to login...', 'success');
+                    setTimeout(() => { loginTab.click(); registerForm.reset(); }, 1500);
+                } else {
+                    showMessage('✗ ' + (result.message || 'Failed to create account'), 'error');
+                }
+            } catch (error) {
+                showMessage('✗ An error occurred. Please try again.', 'error');
+                console.error('Register error:', error);
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
